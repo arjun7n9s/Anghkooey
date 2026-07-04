@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "Anghkooey",
+    "slug": "anghkooey",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "anghkooey",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0a0b"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Scan box QR codes and locate boxes",
+        "NSMicrophoneUsageDescription": "Log box contents by voice"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a0b"
+      },
+      "permissions": ["CAMERA", "RECORD_AUDIO"]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Anghkooey to scan your box QR codes"
+        }
+      ]
+    ]
+  }
+}
