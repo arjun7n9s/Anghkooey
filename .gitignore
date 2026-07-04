@@ -1,0 +1,11 @@
+hangover/
+.env
+.env.local
+node_modules/
+dist/
+.expo/
+.expo-shared/
+*.log
+.DS_Store
+services/api/data/
+*.tsbuildinfo
