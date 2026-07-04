@@ -1,0 +1,10 @@
+{
+  "name": "anghkooey",
+  "private": true,
+  "scripts": {
+    "api": "npm run dev --prefix services/api",
+    "mobile": "npm run start --prefix apps/mobile",
+    "api:install": "npm install --prefix services/api",
+    "mobile:install": "npm install --prefix apps/mobile"
+  }
+}
