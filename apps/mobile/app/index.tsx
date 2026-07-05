@@ -108,6 +108,14 @@ export default function HomeScreen() {
           </Pressable>
         </Link>
 
+        <Link href="/dashboard" asChild>
+          <Pressable style={styles.dashboardCard}>
+            <Text style={styles.dashboardEyebrow}>FOR JUDGES</Text>
+            <Text style={styles.dashboardTitle}>Open dashboard</Text>
+            <Text style={styles.dashboardSub}>Full archive view — stats, boxes, and every item at a glance.</Text>
+          </Pressable>
+        </Link>
+
         <Link href="/boxes" asChild>
           <Pressable style={styles.ghost}>
             <Text style={styles.ghostText}>My boxes ({boxCount || "…"})</Text>
@@ -175,4 +183,13 @@ const styles = StyleSheet.create({
   cardSub: { fontFamily: fonts.body, color: theme.inkSoft, fontSize: 14, lineHeight: 20 },
   ghost: { alignItems: "center", paddingVertical: 12 },
   ghostText: { fontFamily: fonts.bodyBold, color: theme.stamp },
+  dashboardCard: {
+    backgroundColor: theme.wax,
+    padding: 20,
+    borderRadius: 16,
+    gap: 6,
+  },
+  dashboardEyebrow: { fontFamily: fonts.label, fontSize: 11, color: "rgba(255,255,255,0.75)", letterSpacing: 1.2 },
+  dashboardTitle: { fontFamily: fonts.displaySemi, fontSize: 22, color: theme.paper },
+  dashboardSub: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.9)" },
 });

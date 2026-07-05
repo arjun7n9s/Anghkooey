@@ -52,6 +52,7 @@ function GuardedStack() {
     >
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="dashboard" options={{ title: "Dashboard", headerShown: false }} />
       <Stack.Screen name="boxes" options={{ title: "My boxes" }} />
       <Stack.Screen name="print" options={{ title: "Print labels" }} />
       <Stack.Screen name="scan" options={{ title: "Scan label" }} />
