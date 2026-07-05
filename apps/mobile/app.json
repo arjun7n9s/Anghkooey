@@ -6,11 +6,15 @@
     "orientation": "portrait",
     "scheme": "anghkooey",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#0a0a0b"
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FE3C00"
     },
     "ios": {
       "supportsTablet": false,
+      "icon": "./assets/icon.png",
       "infoPlist": {
         "NSCameraUsageDescription": "Scan box QR codes and locate boxes",
         "NSMicrophoneUsageDescription": "Log box contents by voice"
@@ -19,7 +23,8 @@
     "android": {
       "package": "com.anghkooey.app",
       "adaptiveIcon": {
-        "backgroundColor": "#0a0a0b"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FE3C00"
       },
       "permissions": [
         "CAMERA",
