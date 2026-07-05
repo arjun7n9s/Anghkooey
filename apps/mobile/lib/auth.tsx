@@ -37,17 +37,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
+    let cancelled = false;
+
+    const timeout = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 6000);
+
     supabase.auth
       .getSession()
-      .then(({ data }) => setSession(data.session))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .then(({ data }) => {
+        if (!cancelled) setSession(data.session);
+      })
+      .catch((e) => {
+        console.warn("[Anghkooey] getSession failed:", e);
+      })
+      .finally(() => {
+        clearTimeout(timeout);
+        if (!cancelled) setLoading(false);
+      });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
       setSession(next);
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
