@@ -109,7 +109,19 @@ export default function LogScreen() {
     await Audio.requestPermissionsAsync();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
     const rec = new Audio.Recording();
-    await rec.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+    await rec.prepareToRecordAsync({
+      ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      ios: {
+        ...Audio.RecordingOptionsPresets.HIGH_QUALITY.ios,
+        extension: ".wav",
+        outputFormat: Audio.IOSOutputFormat.LINEARPCM,
+        sampleRate: 16000,
+        numberOfChannels: 1,
+        linearPCMBitDepth: 16,
+        linearPCMIsBigEndian: false,
+        linearPCMIsFloat: false,
+      },
+    });
     await rec.startAsync();
     setRecording(rec);
     setSaved(false);

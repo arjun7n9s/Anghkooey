@@ -22,7 +22,9 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { OfflineBanner } from "../components/OfflineBanner";
+import { SideDrawer } from "../components/SideDrawer";
 import { AuthProvider, useAuth } from "../lib/auth";
+import { DrawerProvider } from "../lib/drawer";
 import { theme } from "../lib/theme";
 
 const fadeScreen = {
@@ -106,7 +108,7 @@ function GuardedStack() {
       <Stack.Screen name="index" options={fadeScreen} />
       <Stack.Screen name="dashboard" options={fadeScreen} />
       <Stack.Screen name="boxes" options={fadeScreen} />
-      <Stack.Screen name="print" options={{ title: "Print labels" }} />
+      <Stack.Screen name="print" options={fadeScreen} />
       <Stack.Screen name="scan" options={{ title: "Scan label", ...fadeScreen }} />
       <Stack.Screen name="find" options={fadeScreen} />
       <Stack.Screen name="log/[token]" options={fadeScreen} />
@@ -165,9 +167,12 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AuthProvider>
-        <StatusBar style="dark" />
-        <OfflineBanner />
-        <GuardedStack />
+        <DrawerProvider>
+          <StatusBar style="dark" />
+          <OfflineBanner />
+          <GuardedStack />
+          <SideDrawer />
+        </DrawerProvider>
       </AuthProvider>
     </GestureHandlerRootView>
   );

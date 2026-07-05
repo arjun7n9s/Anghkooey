@@ -2,20 +2,45 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { json, options } from "../_shared/cors.ts";
 import { requireUser } from "../_shared/db.ts";
 
+// Gradium Speech-to-Text (REST). Docs: https://docs.gradium.ai/guides/speech-to-text-rest
+// One-shot: POST raw audio body, x-api-key header, NDJSON streamed back.
+const GRADIUM_ASR_URL = "https://api.gradium.ai/api/post/speech/asr";
+
 async function transcribe(buffer: ArrayBuffer, mimeType: string): Promise<string> {
   const apiKey = Deno.env.get("GRADIUM_API_KEY");
   if (!apiKey) throw new Error("Voice transcription not configured on server");
 
-  const form = new FormData();
-  form.append("file", new Blob([buffer], { type: mimeType }), "recording.m4a");
-  const res = await fetch("https://api.gradium.ai/v1/audio/transcriptions", {
+  const config = encodeURIComponent(JSON.stringify({ language: "en" }));
+  const res = await fetch(`${GRADIUM_ASR_URL}?json_config=${config}`, {
     method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: form,
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": mimeType || "audio/wav",
+    },
+    body: buffer,
   });
-  if (!res.ok) throw new Error(`Transcription failed (${res.status})`);
-  const data = (await res.json()) as { text?: string };
-  const text = data.text?.trim();
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Transcription failed (${res.status})${detail ? `: ${detail.slice(0, 140)}` : ""}`);
+  }
+
+  // NDJSON: each line is {type, text?, end_text?, error?}
+  const raw = await res.text();
+  const parts: string[] = [];
+  for (const line of raw.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const msg = JSON.parse(trimmed) as { type?: string; text?: string; error?: string };
+      if (msg.error) throw new Error(msg.error);
+      if (msg.type === "text" && msg.text) parts.push(msg.text);
+    } catch {
+      // ignore non-JSON keepalive lines
+    }
+  }
+
+  const text = parts.join("").replace(/\s+/g, " ").trim();
   if (!text) throw new Error("No speech detected");
   return text;
 }
@@ -29,7 +54,7 @@ Deno.serve(async (req) => {
 
     const contentType = req.headers.get("content-type") ?? "";
     let buffer: ArrayBuffer;
-    let mimeType = "audio/m4a";
+    let mimeType = "audio/wav";
 
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
@@ -39,6 +64,7 @@ Deno.serve(async (req) => {
       mimeType = file.type || mimeType;
     } else {
       buffer = await req.arrayBuffer();
+      mimeType = contentType || mimeType;
     }
 
     const text = await transcribe(buffer, mimeType);

@@ -57,7 +57,7 @@ export default function BoxesScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <CapsuleNav left={<AngkMark size={28} />} title="BOXES" />
+      <CapsuleNav left={<AngkMark size={28} />} title="MY STUFF" />
       <Text style={styles.subheader}>
         {logged} of {boxes.length} logged
       </Text>

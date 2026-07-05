@@ -6,11 +6,13 @@ import { supabase } from "./supabase";
 type AuthState = {
   session: Session | null;
   loading: boolean;
+  displayName: string;
+  email: string;
   boxesReady: boolean;
   boxCount: number;
   setupError: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshBoxes: () => Promise<void>;
 };
@@ -77,27 +79,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshBoxes();
   }, [session?.access_token]);
 
+  const email = session?.user?.email ?? "";
+  const metaName =
+    (session?.user?.user_metadata?.display_name as string | undefined) ??
+    (session?.user?.user_metadata?.name as string | undefined) ??
+    "";
+  const displayName = metaName || (email ? email.split("@")[0] : "");
+
   const value = useMemo<AuthState>(
     () => ({
       session,
       loading,
+      displayName,
+      email,
       boxesReady,
       boxCount,
       setupError,
-      signIn: async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+      signIn: async (mail, password) => {
+        const { error } = await supabase.auth.signInWithPassword({ email: mail, password });
         if (error) throw error;
       },
-      signUp: async (email, password) => {
-        const { error } = await supabase.auth.signUp({ email, password });
+      signUp: async (mail, password, name) => {
+        const { error } = await supabase.auth.signUp({
+          email: mail,
+          password,
+          options: name ? { data: { display_name: name.trim() } } : undefined,
+        });
         if (error) throw error;
+        if (name?.trim()) {
+          const { data: userData } = await supabase.auth.getUser();
+          const uid = userData.user?.id;
+          if (uid) {
+            await supabase
+              .from("profiles")
+              .upsert({ id: uid, display_name: name.trim() })
+              .then(() => undefined, () => undefined);
+          }
+        }
       },
       signOut: async () => {
         await supabase.auth.signOut();
       },
       refreshBoxes,
     }),
-    [session, loading, boxesReady, boxCount, setupError],
+    [session, loading, displayName, email, boxesReady, boxCount, setupError],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

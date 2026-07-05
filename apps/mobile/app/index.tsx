@@ -105,9 +105,16 @@ export default function HomeScreen() {
         ) : null}
 
         <PillButton
-          label={`My boxes (${boxesReady && statsLoaded ? boxCount : "…"})`}
+          label={`My Stuff (${boxesReady && statsLoaded ? boxCount : "…"})`}
           onPress={() => router.push("/boxes")}
           variant="ghost"
+          size="md"
+          style={styles.fullBtn}
+        />
+        <PillButton
+          label="Download QR labels"
+          onPress={() => router.push("/print")}
+          variant="wax"
           size="md"
           style={styles.fullBtn}
         />

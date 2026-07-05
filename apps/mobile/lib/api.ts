@@ -74,11 +74,21 @@ export const api = {
     const token = await getAccessToken();
     if (!token) throw new Error("Not signed in");
 
+    const ext = uri.split(".").pop()?.toLowerCase() ?? "m4a";
+    const mime =
+      ext === "wav"
+        ? "audio/wav"
+        : ext === "caf"
+          ? "audio/x-caf"
+          : ext === "3gp"
+            ? "audio/3gpp"
+            : "audio/mp4";
+
     const form = new FormData();
     form.append("audio", {
       uri,
-      name: "recording.m4a",
-      type: "audio/m4a",
+      name: `recording.${ext}`,
+      type: mime,
     } as unknown as Blob);
 
     const res = await fetch(`${FUNCTIONS}/transcribe`, {

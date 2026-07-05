@@ -17,18 +17,25 @@ import { fonts } from "../lib/typography";
 
 export default function LoginScreen() {
   const { signIn, signUp } = useAuth();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isSignup = mode === "signup";
+
   async function submit() {
     setError("");
+    if (isSignup && !name.trim()) {
+      setError("What should we call you?");
+      return;
+    }
     setLoading(true);
     try {
-      if (mode === "signin") await signIn(email.trim(), password);
-      else await signUp(email.trim(), password);
+      if (isSignup) await signUp(email.trim(), password, name.trim());
+      else await signIn(email.trim(), password);
       router.replace("/");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Auth failed");
@@ -49,6 +56,16 @@ export default function LoginScreen() {
 
         <View style={[styles.heroCard, cave.heroCard]}>
           <Text style={styles.cardLabel}>BEGIN YOUR ARCHIVE</Text>
+          {isSignup ? (
+            <TextInput
+              style={styles.input}
+              autoCapitalize="words"
+              placeholder="Your name"
+              placeholderTextColor={theme.faded}
+              value={name}
+              onChangeText={setName}
+            />
+          ) : null}
           <TextInput
             style={styles.input}
             autoCapitalize="none"

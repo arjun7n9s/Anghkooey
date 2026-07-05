@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AngkMark } from "./AngkMark";
+import { useDrawer } from "../lib/drawer";
 import { cave, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
 
@@ -9,19 +10,30 @@ export function CapsuleNav({
   right,
   title,
   onPressLeft,
+  menu = true,
 }: {
   left?: ReactNode;
   right?: ReactNode;
   title?: string;
   onPressLeft?: () => void;
+  menu?: boolean;
 }) {
+  const { openDrawer } = useDrawer();
   const leftNode = left ?? <AngkMark size={28} />;
+  const handleLeft = onPressLeft ?? (menu ? openDrawer : undefined);
 
   return (
     <View style={styles.outer}>
       <View style={[styles.inner, cave.lift]}>
-        {onPressLeft ? (
-          <Pressable onPress={onPressLeft}>{leftNode}</Pressable>
+        {handleLeft ? (
+          <Pressable onPress={handleLeft} hitSlop={12} style={styles.leftBtn}>
+            {leftNode}
+            <View style={styles.menuDots}>
+              <View style={styles.dot} />
+              <View style={styles.dot} />
+              <View style={styles.dot} />
+            </View>
+          </Pressable>
         ) : (
           leftNode
         )}
@@ -49,6 +61,9 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
     gap: space.lg,
   },
+  leftBtn: { flexDirection: "row", alignItems: "center", gap: 5 },
+  menuDots: { gap: 2 },
+  dot: { width: 3, height: 3, borderRadius: 2, backgroundColor: theme.cream },
   spacer: { flex: 1 },
   title: {
     flex: 1,
