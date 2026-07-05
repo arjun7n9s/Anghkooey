@@ -34,35 +34,34 @@ Handwritten labels fade. Spreadsheets lie. Memory fails — especially after six
 
 ## Screenshots
 
-### Home — your archive at a glance
-
-Floating capsule nav, pill CTAs, and a stat card showing logged boxes, labels, and categories.
-
-![Home screen](docs/screenshots/home.png)
-
-### Login — open your archive
-
-Centered hero wordmark, italic epigraph, and a scoop card with pill inputs.
-
-![Login screen](docs/screenshots/login.png)
-
-### Scan — align your label
-
-Full-bleed camera with corner brackets. Scan an Anghkooey QR to open the voice log for that box.
-
-![Scan screen](docs/screenshots/scan.png)
-
-### Find — semantic search across every box
-
-Yellow pill search bar. Results show box name, item count, location hint, and a snippet from your original voice log.
-
-![Find screen](docs/screenshots/find.png)
-
-### Print — 24 QR labels per account
-
-Download or print an A4 sheet. Cut along dashed lines, stick on boxes, scan with the app.
-
-![Print labels screen](docs/screenshots/print.png)
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/home.png" alt="Home screen" width="420" />
+      <br /><strong>Home</strong> — archive at a glance
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/login.png" alt="Login screen" width="420" />
+      <br /><strong>Login</strong> — open your archive
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/scan.png" alt="Scan screen" width="420" />
+      <br /><strong>Scan</strong> — align your QR label
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/find.png" alt="Find screen" width="420" />
+      <br /><strong>Find</strong> — semantic search
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <img src="docs/screenshots/print.png" alt="Print labels screen" width="420" />
+      <br /><strong>Print</strong> — 24 QR labels per account
+    </td>
+  </tr>
+</table>
 
 ---
 
