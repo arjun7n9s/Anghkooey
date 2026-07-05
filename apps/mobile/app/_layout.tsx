@@ -17,7 +17,6 @@ import {
 } from "@expo-google-fonts/baloo-2";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -25,8 +24,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { AuthProvider, useAuth } from "../lib/auth";
 import { theme } from "../lib/theme";
-
-SplashScreen.preventAutoHideAsync().catch(() => {});
 
 const fadeScreen = {
   headerShown: false as const,
@@ -149,13 +146,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsReady && SUPABASE_CONFIGURED) {
-      SplashScreen.hideAsync().catch(() => {});
       setAppReady(true);
     }
   }, [fontsReady]);
 
   if (!SUPABASE_CONFIGURED) {
-    SplashScreen.hideAsync().catch(() => {});
     return <ConfigErrorScreen />;
   }
 
