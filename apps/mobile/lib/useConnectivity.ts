@@ -16,13 +16,10 @@ export function useConnectivity(): boolean {
       }
 
       try {
-        const res = await fetch(`${url}/rest/v1/`, {
-          method: "HEAD",
-          headers: { apikey: key },
-        });
+        const res = await fetch(`${url}/auth/v1/health`, { method: "GET" });
         setOffline(!res.ok);
       } catch {
-        setOffline(true);
+        setOffline(Platform.OS === "web" ? !navigator.onLine : true);
       }
     }
 
