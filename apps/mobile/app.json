@@ -17,10 +17,16 @@
       }
     },
     "android": {
+      "package": "com.anghkooey.app",
       "adaptiveIcon": {
         "backgroundColor": "#0a0a0b"
       },
-      "permissions": ["CAMERA", "RECORD_AUDIO"]
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -29,7 +35,18 @@
         {
           "cameraPermission": "Allow Anghkooey to scan your box QR codes"
         }
-      ]
-    ]
+      ],
+      "expo-asset",
+      "expo-font"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a3960cfb-f35d-4326-9c01-a580f6f8693c"
+      }
+    },
+    "owner": "arjun7n9s"
   }
 }
