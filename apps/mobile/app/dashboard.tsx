@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Screen } from "../components/Screen";
+import {
+  Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
+import { router } from "expo-router";
+import { EmptyState } from "../components/EmptyState";
 import { Mark } from "../components/Mark";
+import { Screen } from "../components/Screen";
 import { useAuth } from "../lib/auth";
 import { listBoxesDetailed, type BoxDetail } from "../lib/boxes";
-import { theme } from "../lib/theme";
+import { card, radius, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
 
 function CountUp({ value }: { value: number }) {
@@ -13,18 +22,16 @@ function CountUp({ value }: { value: number }) {
 
   useEffect(() => {
     anim.setValue(0);
+    setDisplay(0);
     const listener = anim.addListener(({ value: v }) => setDisplay(Math.round(v)));
     Animated.timing(anim, { toValue: value, duration: 900, useNativeDriver: false }).start();
-    return () => {
-      anim.removeListener(listener);
-      anim.removeAllListeners();
-    };
+    return () => anim.removeListener(listener);
   }, [value, anim]);
 
   return <Text style={styles.statNum}>{display}</Text>;
 }
 
-function BoxCard({ box, index }: { box: BoxDetail; index: number }) {
+function BoxCard({ box, index, cardWidth }: { box: BoxDetail; index: number; cardWidth: number | string }) {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(12)).current;
 
@@ -46,7 +53,7 @@ function BoxCard({ box, index }: { box: BoxDetail; index: number }) {
   }, [index, opacity, translateY]);
 
   return (
-    <Animated.View style={[styles.boxCard, { opacity, transform: [{ translateY }] }]}>
+    <Animated.View style={[styles.boxCard, { width: cardWidth, opacity, transform: [{ translateY }] }]}>
       <View style={styles.boxHeader}>
         <Text style={styles.boxLabel}>{box.label}</Text>
         {box.isShared ? <Text style={styles.sharedBadge}>Shared with you</Text> : null}
@@ -64,6 +71,9 @@ export default function Dashboard() {
   const { session } = useAuth();
   const [boxes, setBoxes] = useState<BoxDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const { width } = useWindowDimensions();
+  const isWide = width >= 900;
+  const cardWidth = isWide ? "31%" : "100%";
 
   useEffect(() => {
     if (!session) return;
@@ -88,7 +98,7 @@ export default function Dashboard() {
     <Screen style={{ paddingHorizontal: 0 }}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.wordmarkRow}>
-          <Mark size={22} />
+          <Mark size={56} weight="bold" />
           <Text style={styles.wordmark}>Anghkooey</Text>
         </View>
         <Text style={styles.heroEyebrow}>YOUR ARCHIVE</Text>
@@ -113,14 +123,16 @@ export default function Dashboard() {
         {loading ? (
           <Text style={styles.body}>Loading…</Text>
         ) : loggedBoxes.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No boxes logged yet</Text>
-            <Text style={styles.body}>Print labels, scan a QR, and speak what’s inside.</Text>
-          </View>
+          <EmptyState
+            title="Begin your archive."
+            body="Print your labels, stick a QR on a box, and speak what's inside while you pack."
+            actionLabel="Print labels"
+            onAction={() => router.push("/print")}
+          />
         ) : (
           <View style={styles.grid}>
             {loggedBoxes.map((b, index) => (
-              <BoxCard key={b.id} box={b} index={index} />
+              <BoxCard key={b.id} box={b} index={index} cardWidth={cardWidth} />
             ))}
           </View>
         )}
@@ -129,81 +141,75 @@ export default function Dashboard() {
   );
 }
 
-const cardWidth = Platform.OS === "web" ? "31%" : "100%";
-
 const styles = StyleSheet.create({
   container: {
-    padding: Platform.OS === "web" ? 48 : 24,
-    gap: 20,
+    padding: space.hero,
+    gap: space.lg,
     maxWidth: 1200,
+    minWidth: 320,
     alignSelf: "center",
     width: "100%",
   },
   wordmarkRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: space.md,
   },
   wordmark: {
     fontFamily: fonts.display,
-    fontSize: 22,
-    color: theme.stamp,
-    letterSpacing: -0.5,
+    fontSize: 64,
+    color: theme.ink,
+    letterSpacing: -2,
   },
   heroEyebrow: { fontFamily: fonts.label, fontSize: 12, color: theme.faded, letterSpacing: 2 },
-  heroTitle: { fontFamily: fonts.display, fontSize: Platform.OS === "web" ? 72 : 48, color: theme.ink, letterSpacing: -2 },
-  sub: { fontFamily: fonts.body, fontSize: 18, color: theme.inkSoft, marginBottom: 8 },
-  statsRow: { flexDirection: "row", gap: 16 },
+  heroTitle: {
+    fontFamily: fonts.display,
+    fontSize: 72,
+    color: theme.ink,
+    letterSpacing: -2,
+  },
+  sub: { fontFamily: fonts.body, fontSize: 18, color: theme.inkSoft, marginBottom: space.sm },
+  statsRow: { flexDirection: "row", gap: space.lg },
   statCard: {
     flex: 1,
     backgroundColor: theme.paperDeep,
-    padding: 24,
-    borderRadius: 16,
+    padding: card.hero,
+    borderRadius: radius.lg,
     alignItems: "center",
     borderWidth: 1,
     borderColor: theme.line,
   },
-  statNum: { fontFamily: fonts.display, fontSize: Platform.OS === "web" ? 56 : 40, color: theme.ink, letterSpacing: -2 },
+  statNum: { fontFamily: fonts.display, fontSize: 56, color: theme.ink, letterSpacing: -2 },
   statLabel: {
     fontFamily: fonts.label,
     fontSize: 11,
     color: theme.faded,
     letterSpacing: 1.5,
     textTransform: "uppercase",
-    marginTop: 4,
+    marginTop: space.xs,
   },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 20 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: card.default },
   boxCard: {
-    width: cardWidth,
     minWidth: 280,
     backgroundColor: theme.paperDeep,
-    padding: 24,
-    borderRadius: 16,
+    padding: card.hero,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: theme.line,
-    gap: 8,
+    gap: space.sm,
   },
-  boxHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 },
+  boxHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: space.sm },
   boxLabel: { fontFamily: fonts.displaySemi, fontSize: 28, color: theme.ink, letterSpacing: -0.5, flex: 1 },
   sharedBadge: {
     fontFamily: fonts.label,
     fontSize: 10,
-    color: theme.wax,
+    color: theme.indigo,
     letterSpacing: 0.8,
     textTransform: "uppercase",
-    marginTop: 6,
+    marginTop: space.xs,
   },
   boxHint: { fontFamily: fonts.body, fontSize: 14, color: theme.inkSoft, fontStyle: "italic" },
   boxItems: { fontFamily: fonts.body, fontSize: 15, color: theme.ink, lineHeight: 22 },
   boxMore: { fontFamily: fonts.bodyBold, fontSize: 13, color: theme.stamp },
-  emptyCard: {
-    backgroundColor: theme.paperDeep,
-    padding: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: theme.line,
-    gap: 8,
-  },
-  emptyTitle: { fontFamily: fonts.displaySemi, fontSize: 24, color: theme.ink },
   body: { fontFamily: fonts.body, fontSize: 16, color: theme.inkSoft, lineHeight: 24 },
 });

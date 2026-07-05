@@ -1,10 +1,35 @@
+export const space = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 24,
+  xxl: 32,
+  hero: 48,
+} as const;
+
+export const radius = {
+  sm: 8,
+  md: 12,
+  lg: 16,
+  pill: 999,
+} as const;
+
+export const card = {
+  hero: 24,
+  default: 20,
+  tight: 16,
+} as const;
+
 export const theme = {
   paper: "#F4EDE4",
   paperDeep: "#E8DDD0",
   ink: "#1A1614",
   inkSoft: "#5C534A",
+  inkFaint: "#9A8F82",
   stamp: "#C44B37",
   wax: "#2E5E4E",
+  indigo: "#5A6B8A",
   faded: "#9A8F82",
   line: "#D4C8B8",
   error: "#A63D2F",

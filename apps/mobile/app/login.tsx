@@ -1,11 +1,11 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { Screen } from "../components/Screen";
 import { useAuth } from "../lib/auth";
 import { fonts } from "../lib/typography";
-import { theme } from "../lib/theme";
+import { card, radius, space, theme } from "../lib/theme";
 
 export default function LoginScreen() {
   const { signIn, signUp } = useAuth();
@@ -38,7 +38,7 @@ export default function LoginScreen() {
       </Text>
       <Text style={styles.sub}>Open your archive of physical stuff.</Text>
 
-      <View style={styles.card}>
+      <View style={styles.formCard}>
         <TextInput
           style={styles.input}
           autoCapitalize="none"
@@ -66,7 +66,10 @@ export default function LoginScreen() {
         />
       </View>
 
-      <Pressable onPress={() => setMode(mode === "signin" ? "signup" : "signin")}>
+      <Pressable
+        onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
+        style={({ pressed }) => [styles.switchWrap, pressed && styles.switchPressed]}
+      >
         <Text style={styles.switch}>
           {mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}
         </Text>
@@ -76,7 +79,7 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { justifyContent: "center", gap: 14 },
+  container: { justifyContent: "center", gap: space.md },
   eyebrow: {
     fontFamily: fonts.label,
     fontSize: 11,
@@ -85,26 +88,26 @@ const styles = StyleSheet.create({
   },
   logo: {
     fontFamily: fonts.display,
-    fontSize: 40,
+    fontSize: 56,
     color: theme.ink,
-    letterSpacing: -1,
+    letterSpacing: -1.5,
   },
   epigraph: {
     fontFamily: fonts.displayItalic,
-    fontSize: 17,
+    fontSize: 16,
     color: theme.inkSoft,
     fontStyle: "italic",
     maxWidth: 320,
-    marginTop: 16,
-    marginBottom: 24,
-    lineHeight: 26,
+    marginTop: space.xs,
+    marginBottom: space.xl,
+    lineHeight: 24,
   },
-  sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: 12 },
-  card: {
+  sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: space.md },
+  formCard: {
     backgroundColor: theme.paperDeep,
-    padding: 20,
-    borderRadius: 16,
-    gap: 12,
+    padding: card.default,
+    borderRadius: radius.lg,
+    gap: space.md,
     borderWidth: 1,
     borderColor: theme.line,
   },
@@ -112,12 +115,20 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     backgroundColor: theme.paper,
     color: theme.ink,
-    padding: 14,
-    borderRadius: 10,
+    padding: card.tight,
+    borderRadius: radius.md,
     fontSize: 16,
     borderWidth: 1,
     borderColor: theme.line,
   },
   error: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
-  switch: { fontFamily: fonts.body, color: theme.stamp, textAlign: "center", marginTop: 8, fontSize: 14 },
+  switchWrap: { padding: space.sm, alignItems: "center" },
+  switchPressed: { opacity: 0.6 },
+  switch: {
+    fontFamily: fonts.body,
+    color: theme.stamp,
+    textAlign: "center",
+    fontSize: 14,
+    textDecorationLine: "underline",
+  },
 });

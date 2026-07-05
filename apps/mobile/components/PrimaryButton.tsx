@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, ViewStyle } from "react-native";
-import { theme } from "../lib/theme";
+import { fonts } from "../lib/typography";
+import { card, radius, theme } from "../lib/theme";
 
 export function PrimaryButton({
   label,
@@ -26,10 +27,10 @@ export function PrimaryButton({
 const styles = StyleSheet.create({
   btn: {
     backgroundColor: theme.stamp,
-    paddingVertical: 16,
-    borderRadius: 14,
+    paddingVertical: card.tight,
+    borderRadius: radius.md,
     alignItems: "center",
   },
   disabled: { opacity: 0.5 },
-  text: { color: theme.paper, fontSize: 16, fontWeight: "700" },
+  text: { fontFamily: fonts.bodyBold, color: theme.paper, fontSize: 16 },
 });

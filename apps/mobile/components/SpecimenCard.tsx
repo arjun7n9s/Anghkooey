@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { categoryColor, theme } from "../lib/theme";
+import { categoryColor, card, radius, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
 import type { FindResult } from "../lib/types";
 
@@ -85,25 +85,24 @@ export function SpecimenCard({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.paperDeep,
-    padding: 18,
-    borderRadius: 16,
-    marginBottom: 12,
+    padding: card.default,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: theme.line,
-    gap: 10,
+    gap: space.md,
   },
   topRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 12,
+    gap: space.md,
   },
   rank: {
     fontFamily: fonts.display,
     fontSize: 11,
     color: theme.faded,
     letterSpacing: -0.3,
-    marginTop: 4,
+    marginTop: space.xs,
   },
   label: {
     fontFamily: fonts.displaySemi,
@@ -115,13 +114,13 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
+    gap: space.sm,
   },
   chip: {
     borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: radius.pill,
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
     maxWidth: "100%",
   },
   chipText: {
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
   quote: {
     borderLeftWidth: 3,
     borderLeftColor: theme.stamp,
-    paddingLeft: 12,
+    paddingLeft: space.md,
     paddingVertical: 2,
   },
   quoteText: {

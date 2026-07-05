@@ -16,7 +16,7 @@ import { deleteBoxItem, updateBoxMeta } from "../../lib/boxes";
 import { api, type Box } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { fonts } from "../../lib/typography";
-import { theme } from "../../lib/theme";
+import { card, radius, space, theme } from "../../lib/theme";
 
 export default function LogScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
@@ -166,9 +166,7 @@ export default function LogScreen() {
       <Text style={styles.boxNumber}>{boxLabel || box?.label}</Text>
       {!isOwner ? (
         <Text style={styles.sharedView}>Shared with you — view only</Text>
-      ) : (
-        <Text style={styles.sub}>Tell this box what’s inside while you pack.</Text>
-      )}
+      ) : null}
 
       {isOwner ? (
         <>
@@ -187,23 +185,24 @@ export default function LogScreen() {
             </Pressable>
           </View>
 
-          <Pressable
-            style={[styles.mic, recording && styles.micActive]}
-            onPressIn={startRecording}
-            onPressOut={stopAndSave}
-            disabled={saving}
-          >
-            {saving && !recording ? (
-              <ActivityIndicator color={theme.paper} />
-            ) : (
-              <>
-                <Text style={styles.micText}>
-                  {recording ? "Listening… release to save" : "Hold to log by voice"}
-                </Text>
-                {recording ? <View style={styles.wave} /> : null}
-              </>
-            )}
-          </Pressable>
+          <View style={styles.micWrap}>
+            <Pressable
+              style={[styles.micCircle, recording && styles.micCircleActive]}
+              onPressIn={startRecording}
+              onPressOut={stopAndSave}
+              disabled={saving}
+            >
+              {saving && !recording ? (
+                <ActivityIndicator color={theme.paper} size="large" />
+              ) : (
+                <View style={styles.micInner}>
+                  <View style={[styles.micPulse, recording && styles.micPulseRecording]} />
+                  <Text style={styles.micText}>{recording ? "Listening…" : "Hold to speak"}</Text>
+                </View>
+              )}
+            </Pressable>
+            <Text style={styles.micHint}>Tell this box what&apos;s inside while you pack.</Text>
+          </View>
 
           <Text style={styles.sectionLabel}>OR TYPE IT</Text>
           <TextInput
@@ -219,20 +218,24 @@ export default function LogScreen() {
             onPress={() => persistTranscript(manualText)}
             disabled={saving || !manualText.trim()}
           />
-
-          <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
-          <TextInput
-            style={styles.inputSingle}
-            placeholder="Garage, top shelf, far right…"
-            placeholderTextColor={theme.faded}
-            value={locationHint}
-            onChangeText={setLocationHint}
-            onBlur={saveMeta}
-          />
         </>
+      ) : null}
+
+      <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
+      {isOwner ? (
+        <TextInput
+          style={styles.inputSingle}
+          placeholder="Garage, top shelf, far right…"
+          placeholderTextColor={theme.faded}
+          value={locationHint}
+          onChangeText={setLocationHint}
+          onBlur={saveMeta}
+        />
       ) : box?.locationHint ? (
         <Text style={styles.locationReadonly}>📍 {box.locationHint}</Text>
-      ) : null}
+      ) : (
+        <Text style={styles.locationEmpty}>No location logged yet.</Text>
+      )}
 
       {error ? <Text style={styles.errorInline}>{error}</Text> : null}
       {saved ? <Text style={styles.saved}>Saved to {boxLabel || box?.label}</Text> : null}
@@ -246,7 +249,9 @@ export default function LogScreen() {
 
       {items.length > 0 && (
         <View style={styles.chipsWrap}>
-          <Text style={styles.sectionLabel}>ITEMS · TAP × TO REMOVE</Text>
+          <Text style={styles.sectionLabel}>
+            {isOwner ? "ITEMS · TAP × TO REMOVE" : "ITEMS"}
+          </Text>
           <AnimatedChips key={chipKey} items={items} onRemove={isOwner ? removeItem : undefined} />
         </View>
       )}
@@ -279,22 +284,22 @@ export default function LogScreen() {
                 setShareStatus(e instanceof Error ? e.message : "Share failed");
               }
             }}
-            style={{ marginTop: 8 }}
+            style={{ marginTop: space.sm }}
           />
           {shareStatus ? <Text style={styles.saved}>{shareStatus}</Text> : null}
         </View>
       )}
 
       {saved && (
-        <PrimaryButton label="Find something else" onPress={() => router.push("/find")} style={{ marginTop: 16 }} />
+        <PrimaryButton label="Find something else" onPress={() => router.push("/find")} style={{ marginTop: space.lg }} />
       )}
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 24, gap: 14, backgroundColor: theme.paper },
-  center: { flex: 1, justifyContent: "center", padding: 24, gap: 12, backgroundColor: theme.paper },
+  container: { padding: space.xl, gap: space.md, backgroundColor: theme.paper },
+  center: { flex: 1, justifyContent: "center", padding: space.xl, gap: space.md, backgroundColor: theme.paper },
   sectionLabel: {
     fontFamily: fonts.label,
     fontSize: 11,
@@ -305,22 +310,22 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bodyMedium,
     backgroundColor: theme.paperDeep,
     color: theme.ink,
-    padding: 12,
-    borderRadius: 10,
+    padding: card.tight,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: theme.line,
     fontSize: 15,
   },
   boxNumber: { fontFamily: fonts.display, fontSize: 48, color: theme.ink, letterSpacing: -1 },
-  sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: 4 },
-  sharedView: { fontFamily: fonts.bodyBold, color: theme.wax, marginBottom: 4 },
+  sharedView: { fontFamily: fonts.bodyBold, color: theme.faded, marginBottom: space.xs },
   labelReadonly: { fontFamily: fonts.bodyMedium, fontSize: 15, color: theme.inkSoft },
   locationReadonly: { fontFamily: fonts.body, fontSize: 15, color: theme.inkSoft, fontStyle: "italic" },
-  modeRow: { flexDirection: "row", gap: 8 },
+  locationEmpty: { fontFamily: fonts.body, fontSize: 14, color: theme.faded, fontStyle: "italic" },
+  modeRow: { flexDirection: "row", gap: space.sm },
   modeBtn: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: space.md,
+    borderRadius: radius.md,
     alignItems: "center",
     borderWidth: 1,
     borderColor: theme.line,
@@ -329,30 +334,38 @@ const styles = StyleSheet.create({
   modeActive: { borderColor: theme.stamp, backgroundColor: theme.paper },
   modeText: { fontFamily: fonts.bodyMedium, color: theme.faded, fontSize: 13 },
   modeTextActive: { color: theme.stamp, fontFamily: fonts.bodyBold },
-  mic: {
+  micWrap: { alignItems: "center", marginVertical: space.xxl, gap: space.lg },
+  micCircle: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     backgroundColor: theme.stamp,
-    minHeight: 120,
-    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
-    gap: 10,
+    shadowColor: theme.stamp,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 8,
   },
-  micActive: { backgroundColor: "#9E3A2E" },
-  micText: { fontFamily: fonts.bodyBold, color: theme.paper, fontSize: 16, textAlign: "center" },
-  wave: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 3,
-    borderColor: "rgba(255,255,255,0.5)",
+  micCircleActive: { backgroundColor: "#9E3A2E", transform: [{ scale: 1.04 }] },
+  micInner: { alignItems: "center", gap: space.sm },
+  micPulse: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: theme.paper,
+    opacity: 0.7,
   },
+  micPulseRecording: { opacity: 1, transform: [{ scale: 1.4 }] },
+  micText: { fontFamily: fonts.bodyBold, color: theme.paper, fontSize: 15, letterSpacing: 0.3 },
+  micHint: { fontFamily: fonts.body, color: theme.faded, fontSize: 13, fontStyle: "italic" },
   input: {
     fontFamily: fonts.body,
     backgroundColor: theme.paperDeep,
     color: theme.ink,
-    padding: 14,
-    borderRadius: 12,
+    padding: card.tight,
+    borderRadius: radius.md,
     fontSize: 15,
     borderWidth: 1,
     borderColor: theme.line,
@@ -363,28 +376,28 @@ const styles = StyleSheet.create({
     fontFamily: fonts.body,
     backgroundColor: theme.paperDeep,
     color: theme.ink,
-    padding: 14,
-    borderRadius: 12,
+    padding: card.tight,
+    borderRadius: radius.md,
     fontSize: 15,
     borderWidth: 1,
     borderColor: theme.line,
   },
   quote: {
     backgroundColor: theme.paperDeep,
-    padding: 16,
-    borderRadius: 14,
+    padding: card.tight,
+    borderRadius: radius.lg,
     borderLeftWidth: 3,
     borderLeftColor: theme.stamp,
   },
-  quoteLabel: { fontFamily: fonts.label, color: theme.faded, marginBottom: 8 },
+  quoteLabel: { fontFamily: fonts.label, color: theme.faded, marginBottom: space.sm },
   quoteText: { fontFamily: fonts.body, color: theme.ink, lineHeight: 22, fontStyle: "italic" },
-  chipsWrap: { gap: 8 },
+  chipsWrap: { gap: space.sm },
   shareSection: {
-    marginTop: 8,
-    paddingTop: 16,
+    marginTop: space.sm,
+    paddingTop: space.lg,
     borderTopWidth: 1,
     borderTopColor: theme.line,
-    gap: 8,
+    gap: space.sm,
   },
   shareHint: { fontFamily: fonts.body, fontSize: 14, color: theme.inkSoft, lineHeight: 20 },
   error: { fontFamily: fonts.body, color: theme.error, textAlign: "center" },

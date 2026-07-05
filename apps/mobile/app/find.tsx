@@ -17,7 +17,7 @@ import { api } from "../lib/api";
 import { speakReply } from "../lib/speak";
 import type { FindResult } from "../lib/types";
 import { fonts } from "../lib/typography";
-import { theme } from "../lib/theme";
+import { card, radius, space, theme } from "../lib/theme";
 
 const SUGGESTIONS = ["camera", "cables", "charger", "hoodie", "book", "postcard"];
 
@@ -108,9 +108,9 @@ export default function FindScreen() {
 
       <FlatList
         data={results}
-        keyExtractor={(r) => r.boxId}
-        style={{ marginTop: 12, flex: 1 }}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        keyExtractor={(r) => `${r.boxId}-${r.qrToken}`}
+        style={{ marginTop: space.md, flex: 1 }}
+        contentContainerStyle={{ paddingBottom: space.xl, gap: space.md }}
         ListEmptyComponent={
           searched && !loading && !error ? (
             <EmptyState title="No matches" body="Try a shorter word or log more items in your boxes." />
@@ -125,24 +125,24 @@ export default function FindScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { gap: 12, flex: 1 },
+  container: { gap: space.md, flex: 1 },
   title: { fontFamily: fonts.displaySemi, fontSize: 28, color: theme.ink },
   input: {
     fontFamily: fonts.body,
     backgroundColor: theme.paperDeep,
     color: theme.ink,
-    padding: 16,
-    borderRadius: 12,
+    padding: card.tight,
+    borderRadius: radius.md,
     fontSize: 16,
     borderWidth: 1,
     borderColor: theme.line,
   },
-  suggestions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  suggestions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   chip: {
     backgroundColor: theme.paperDeep,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
+    paddingHorizontal: space.md,
+    paddingVertical: space.sm,
+    borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: theme.line,
   },
@@ -150,12 +150,12 @@ const styles = StyleSheet.create({
   error: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
   replyCard: {
     backgroundColor: theme.paperDeep,
-    padding: 14,
-    borderRadius: 12,
+    padding: card.tight,
+    borderRadius: radius.md,
     borderLeftWidth: 3,
     borderLeftColor: theme.wax,
   },
   reply: { fontFamily: fonts.body, color: theme.ink, lineHeight: 22 },
-  listenBtn: { marginTop: 10, alignSelf: "flex-start" },
+  listenBtn: { marginTop: space.md, alignSelf: "flex-start" },
   listenText: { fontFamily: fonts.bodyBold, color: theme.stamp, fontSize: 14 },
 });

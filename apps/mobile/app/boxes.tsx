@@ -13,7 +13,7 @@ import { EmptyState } from "../components/EmptyState";
 import { Screen } from "../components/Screen";
 import { listBoxes, type BoxSummary } from "../lib/boxes";
 import { fonts } from "../lib/typography";
-import { theme } from "../lib/theme";
+import { card, radius, space, theme } from "../lib/theme";
 
 export default function BoxesScreen() {
   const [boxes, setBoxes] = useState<BoxSummary[]>([]);
@@ -51,11 +51,11 @@ export default function BoxesScreen() {
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {loading ? (
-        <ActivityIndicator color={theme.stamp} style={{ marginTop: 32 }} />
+        <ActivityIndicator color={theme.stamp} style={{ marginTop: space.xxl }} />
       ) : (
         <FlatList
           data={boxes}
-          keyExtractor={(b) => b.id}
+          keyExtractor={(b) => `${b.id}-${b.isShared ? "shared" : "own"}`}
           contentContainerStyle={styles.list}
           refreshControl={
             <RefreshControl
@@ -79,10 +79,8 @@ export default function BoxesScreen() {
             <Pressable style={styles.row} onPress={() => router.push(`/log/${item.qrToken}`)}>
               <View style={[styles.statusDot, item.itemCount > 0 && styles.statusLogged]} />
               <View style={styles.rowMain}>
-                <View style={styles.labelRow}>
-                  <Text style={styles.label}>{item.label}</Text>
-                  {item.isShared ? <Text style={styles.sharedBadge}>Shared</Text> : null}
-                </View>
+                <Text style={styles.label}>{item.label}</Text>
+                {item.isShared ? <Text style={styles.sharedBadge}>Shared</Text> : null}
                 <Text style={styles.meta}>
                   {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
                   {item.locationHint ? ` · ${item.locationHint}` : ""}
@@ -105,41 +103,41 @@ export default function BoxesScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: 24, paddingBottom: 12, gap: 4 },
+  header: { paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.xs },
   title: { fontFamily: fonts.displaySemi, fontSize: 28, color: theme.ink },
   sub: { fontFamily: fonts.body, color: theme.inkSoft, fontSize: 14 },
-  list: { paddingHorizontal: 24, paddingBottom: 24 },
+  list: { paddingHorizontal: space.xl, paddingBottom: space.xl, gap: space.md },
   row: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: theme.paperDeep,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: radius.lg,
+    padding: card.default,
     borderWidth: 1,
     borderColor: theme.line,
-    marginBottom: 10,
-    gap: 12,
+    marginBottom: space.md,
+    gap: space.md,
   },
   statusDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: theme.line,
+    backgroundColor: theme.faded,
   },
   statusLogged: { backgroundColor: theme.wax },
-  rowMain: { flex: 1, gap: 4 },
-  labelRow: { flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" },
+  rowMain: { flex: 1, gap: space.xs },
   label: { fontFamily: fonts.bodyBold, fontSize: 17, color: theme.ink },
   sharedBadge: {
     fontFamily: fonts.label,
     fontSize: 10,
-    color: theme.wax,
+    color: theme.indigo,
     letterSpacing: 0.8,
     textTransform: "uppercase",
+    alignSelf: "flex-start",
   },
   meta: { fontFamily: fonts.body, fontSize: 12, color: theme.faded },
-  preview: { fontFamily: fonts.body, fontSize: 13, color: theme.inkSoft, fontStyle: "italic", marginTop: 4 },
+  preview: { fontFamily: fonts.body, fontSize: 13, color: theme.inkSoft, fontStyle: "italic", marginTop: space.xs },
   emptyRow: { fontFamily: fonts.body, fontSize: 13, color: theme.faded, fontStyle: "italic" },
   chevron: { fontFamily: fonts.bodyBold, color: theme.stamp, fontSize: 18 },
-  error: { fontFamily: fonts.body, color: theme.error, paddingHorizontal: 24, marginBottom: 8 },
+  error: { fontFamily: fonts.body, color: theme.error, paddingHorizontal: space.xl, marginBottom: space.sm },
 });

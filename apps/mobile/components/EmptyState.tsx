@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { PrimaryButton } from "./PrimaryButton";
 import { fonts } from "../lib/typography";
-import { theme } from "../lib/theme";
+import { card, radius, space, theme } from "../lib/theme";
 
 export function EmptyState({
   title,
@@ -23,7 +23,7 @@ export function EmptyState({
       <Text style={styles.body}>{body}</Text>
       {children}
       {actionLabel && onAction ? (
-        <PrimaryButton label={actionLabel} onPress={onAction} style={{ marginTop: 8 }} />
+        <PrimaryButton label={actionLabel} onPress={onAction} style={{ marginTop: space.sm }} />
       ) : null}
     </View>
   );
@@ -32,15 +32,15 @@ export function EmptyState({
 const styles = StyleSheet.create({
   wrap: {
     backgroundColor: theme.paperDeep,
-    padding: 24,
-    borderRadius: 16,
+    padding: card.hero,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: theme.line,
     borderStyle: "dashed",
     alignItems: "center",
-    gap: 8,
+    gap: space.sm,
   },
-  title: { fontFamily: fonts.displaySemi, fontSize: 20, color: theme.ink, textAlign: "center" },
+  title: { fontFamily: fonts.display, fontSize: 20, color: theme.ink, textAlign: "center" },
   body: {
     fontFamily: fonts.body,
     fontSize: 14,
