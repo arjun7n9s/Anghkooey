@@ -2,41 +2,55 @@
 
 Voice-logged physical inventory — scan your QR, say what's inside, find it later.
 
-## Quick start (5h sprint)
+## Cloud + Android APK (hackathon demo)
+
+No laptop on stage. Deploy Supabase + build APK:
+
+See **[docs/SUPABASE-DEPLOY.md](docs/SUPABASE-DEPLOY.md)** for:
+
+- `supabase login` → `supabase link --project-ref pdbtnwekwxcoxktfnsbt`
+- `supabase db push` + `supabase functions deploy`
+- `eas build -p android --profile preview`
+
+Mobile uses **Supabase Auth** (email/password) + Edge Functions (Gradium STT, regex parse, find).
+
+## Quick start (local dev)
 
 ```powershell
-# Terminal 1 — API
+# Terminal 1 — API (optional fallback)
 cd services/api
 npm install
 npm run dev
 
-# Terminal 2 — Mobile (use LAN IP for physical device)
+# Terminal 2 — Mobile
 cd apps/mobile
 npm install
-# set EXPO_PUBLIC_API_URL=http://YOUR_PC_IP:8787 in .env or app config
+copy .env.example .env
 npx expo start
 ```
 
-**QR print sheet:** http://127.0.0.1:8787/print/sheet  
-**Demo token:** `demo-box-14-canonical` (pre-seeded Canon items)
+**QR print sheet (local):** http://127.0.0.1:8787/print/sheet
 
-## Demo path
+## Demo path (real app flow)
 
-1. Home → **Scan** → skip to Box #14 OR scan printed QR  
-2. **Hold to log** (or "Use demo script") → item chips appear  
-3. **Find something** → "Canon camera" → Box #14  
-4. **Find it → camera** → sweep until QR glows green  
+1. Sign in → **Print your labels** (24 QRs tied to your account)
+2. Stick labels on boxes → **Scan & log by voice** (or type items + save location hint)
+3. **My boxes** — see everything logged
+4. **Find something** → tap result → **Locate** with camera + your saved location hint
+
+## Demo path (quick test)
 
 ## Monorepo
 
 | Path | Purpose |
 |------|---------|
-| `services/api` | Express API, in-memory store (+ Supabase later) |
-| `apps/mobile` | Expo app |
+| `services/api` | Express API (local dev fallback) |
+| `apps/mobile` | Expo app + Supabase auth |
 | `packages/shared` | Shared types |
-| `supabase/schema.sql` | Postgres when ready |
-| `docs/planning/5H-PARALLEL-PLAN.md` | Sprint plan |
+| `supabase/migrations` | Postgres schema + RLS |
+| `supabase/functions` | Edge Functions (cloud API) |
+| `docs/SUPABASE-DEPLOY.md` | Deploy checklist |
 
 ## Stack
 
-Gradium STT · Gemma/Crusoe parse (optional) · Expo · Express · Cursor
+Gradium STT · regex item parse · Supabase Auth + Edge Functions · Expo · Cursor
