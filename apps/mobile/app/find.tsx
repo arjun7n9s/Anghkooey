@@ -14,6 +14,7 @@ import { PrimaryButton } from "../components/PrimaryButton";
 import { SpecimenCard } from "../components/SpecimenCard";
 import { Screen } from "../components/Screen";
 import { api } from "../lib/api";
+import { speakReply } from "../lib/speak";
 import type { FindResult } from "../lib/types";
 import { fonts } from "../lib/typography";
 import { theme } from "../lib/theme";
@@ -90,6 +91,9 @@ export default function FindScreen() {
       {reply && results.length > 0 ? (
         <View style={styles.replyCard}>
           <Text style={styles.reply}>{reply}</Text>
+          <Pressable onPress={() => speakReply(reply)} style={styles.listenBtn}>
+            <Text style={styles.listenText}>🔊 Listen to reply</Text>
+          </Pressable>
         </View>
       ) : null}
 
@@ -152,4 +156,6 @@ const styles = StyleSheet.create({
     borderLeftColor: theme.wax,
   },
   reply: { fontFamily: fonts.body, color: theme.ink, lineHeight: 22 },
+  listenBtn: { marginTop: 10, alignSelf: "flex-start" },
+  listenText: { fontFamily: fonts.bodyBold, color: theme.stamp, fontSize: 14 },
 });
