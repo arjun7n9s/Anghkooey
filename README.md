@@ -1,56 +1,59 @@
 # Anghkooey
 
-Voice-logged physical inventory — scan your QR, say what's inside, find it later.
+A memory layer for your physical stuff. Scan a QR, speak what's inside, find it later — and share with anyone.
 
-## Cloud + Android APK (hackathon demo)
+## The problem
 
-No laptop on stage. Deploy Supabase + build APK:
+Every adult has boxes they stopped opening. Storage units, garages, parent basements, the closet of winter clothes. When you need something, you don't know where it is. Handwritten labels fade. Photos are too slow. Memory fails, especially after six months.
 
-See **[docs/SUPABASE-DEPLOY.md](docs/SUPABASE-DEPLOY.md)** for:
+## The redesign
 
-- `supabase login` → `supabase link --project-ref pdbtnwekwxcoxktfnsbt`
-- `supabase db push` + `supabase functions deploy`
-- `eas build -p android --profile preview`
+Stick a QR on a box. Scan with the app. Speak what's inside. The app remembers — every item, every word you said, where you last put the box. Find anything by asking, by scanning, or by pointing your camera at the room. **Share a box with a partner** — they can scan your QR and see what's inside.
 
-Mobile uses **Supabase Auth** (email/password) + Edge Functions (Gradium STT, regex parse, find).
+## Demo (90 seconds)
+
+See **[docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md)** and **[docs/PRE-DEMO-CHECKLIST.md](docs/PRE-DEMO-CHECKLIST.md)**.
+
+| Beat | Screen |
+|------|--------|
+| Login | Open your archive |
+| Dashboard | Stats + grid of every box (judges' screen) |
+| Voice log | Speak 12 items in 20 seconds |
+| Find | "Where's the old camera?" → Box + location |
+| Locate | Sweep the room — the right box glows |
+| Share | Partner scans your QR, sees your items |
 
 ## Quick start (local dev)
 
 ```powershell
-# Terminal 1 — API (optional fallback)
-cd services/api
-npm install
-npm run dev
-
-# Terminal 2 — Mobile
 cd apps/mobile
 npm install
 copy .env.example .env
-npx expo start
+npx expo start --web --port 8082
 ```
 
-**QR print sheet (local):** http://127.0.0.1:8787/print/sheet
+Open **http://localhost:8082** — dashboard at `/dashboard`.
 
-## Demo path (real app flow)
+## Cloud + Android APK
 
-1. Sign in → **Print your labels** (24 QRs tied to your account)
-2. Stick labels on boxes → **Scan & log by voice** (or type items + save location hint)
-3. **My boxes** — see everything logged
-4. **Find something** → tap result → **Locate** with camera + your saved location hint
+See **[docs/SUPABASE-DEPLOY.md](docs/SUPABASE-DEPLOY.md)** for Supabase deploy + EAS build.
 
-## Demo path (quick test)
+```powershell
+eas build -p android --profile preview
+```
 
 ## Monorepo
 
 | Path | Purpose |
 |------|---------|
-| `services/api` | Express API (local dev fallback) |
-| `apps/mobile` | Expo app + Supabase auth |
-| `packages/shared` | Shared types |
+| `apps/mobile` | Expo app (web + Android) |
+| `supabase/functions` | Edge Functions (Gradium STT, find, share) |
 | `supabase/migrations` | Postgres schema + RLS |
-| `supabase/functions` | Edge Functions (cloud API) |
-| `docs/SUPABASE-DEPLOY.md` | Deploy checklist |
+| `docs/` | Design system, demo script, deploy guide |
 
 ## Stack
 
-Gradium STT · regex item parse · Supabase Auth + Edge Functions · Expo · Cursor
+- **Mobile:** Expo + React Native + expo-router
+- **Voice:** Gradium STT · browser/native TTS for find replies
+- **Backend:** Supabase Auth + Postgres + Edge Functions + RLS
+- **Design:** Fraunces + DM Sans · warm paper palette

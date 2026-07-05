@@ -1,7 +1,5 @@
 # Anghkooey — Refinement Roadmap
 
-You have runway. Work in this order — each phase is shippable on its own.
-
 ---
 
 ## Phase 1 — Polish what exists ✅
@@ -13,35 +11,36 @@ You have runway. Work in this order — each phase is shippable on its own.
 - [x] Hero card contrast fixes
 - [x] Pull-to-refresh on home
 
-## Phase 2 — Trust & completeness (in progress)
+## Phase 2 — Trust & completeness ✅
 
 - [x] Delete individual items from a box
 - [x] Rename box label
 - [x] Empty states with guided copy on find/boxes
-- [ ] Offline banner when Supabase unreachable
+- [x] Offline banner when Supabase unreachable
 - [x] Better parse: quantities ("two HDMI cables")
 - [x] Improved find scoring (item-level matching)
+- [x] **Shared boxes** — invite by email, RLS read access
 
-## Phase 3 — Design track wow (in progress)
+## Phase 3 — Design track wow ✅
 
 - [x] Fraunces box numbers on log screen (48px hero)
 - [x] Specimen card component for find results
 - [x] Print sheet matches app typography (Fraunces + DM Sans)
-- [ ] Subtle paper grain texture
+- [x] Subtle paper grain texture (web)
 - [x] Chip stagger animation on save
 - [x] Mic pulse ring while recording
+- [x] **Browser dashboard** — wordmark, stats, box grid
 
-## Phase 4 — Demo & judges (+1h)
+## Phase 4 — Demo & judges (in progress)
 
-- [ ] 90-second demo script doc with screen order
-- [ ] Pre-demo checklist (Gradium key, APK, printed QRs)
-- [ ] Optional: TTS for find reply (`expo-speech`)
-- [ ] Rebuild APK after each major phase
+- [x] 90-second demo script doc with screen order
+- [x] Pre-demo checklist (Gradium key, APK, printed QRs)
+- [x] TTS for find reply (web SpeechSynthesis + expo-speech)
+- [ ] Rebuild APK after major phases
 
 ## Phase 5 — Stretch (if time)
 
 - [ ] LLM item parsing (OpenAI-compatible endpoint)
-- [ ] Share box with partner (RLS + invite)
 - [ ] NFC tags alongside QR
 - [ ] Deep link `anghkooey.app/b/{token}`
 
@@ -51,16 +50,16 @@ You have runway. Work in this order — each phase is shippable on its own.
 
 | Issue | Fix |
 |-------|-----|
-| Old APK missing new screens | Rebuild EAS after Phase 1 |
-| Account still has demo Box #14 data | Re-log boxes or clear `box_items` in dashboard |
+| Old APK missing share + dashboard | Rebuild EAS (`eas build -p android --profile preview`) |
 | Web: no camera/mic in browser | Test voice on phone; use typed log on web |
-| `sb_publishable` key format | Fall back to JWT anon key if auth breaks |
+| Partner account | `partner-demo@anghkooey.com` / `demo-password-123` |
 
 ---
 
-## How to test each phase
+## How to test
 
-1. **Print** → save PDF → scan one QR from phone screen
+1. **Print** → save PDF → scan one QR
 2. **Log** → voice + location → verify in **My boxes**
-3. **Find** → search item → **Locate** → haptic + glow
-4. **Append** → log again with new items → old items remain
+3. **Find** → search → **Listen** → **Locate**
+4. **Share** → partner email → incognito login → scan same QR
+5. **Dashboard** → `/dashboard` on big screen
