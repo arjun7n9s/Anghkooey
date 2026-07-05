@@ -14,6 +14,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { OfflineBanner } from "../components/OfflineBanner";
 import { AuthProvider, useAuth } from "../lib/auth";
 import { theme } from "../lib/theme";
 
@@ -77,6 +78,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <StatusBar style="dark" />
+      <OfflineBanner />
       <GuardedStack />
     </AuthProvider>
   );
