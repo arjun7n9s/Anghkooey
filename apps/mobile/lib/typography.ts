@@ -1,9 +1,10 @@
 export const fonts = {
-  display: "Fraunces_700Bold",
-  displaySemi: "Fraunces_600SemiBold",
+  // Baloo 2 — chunky rounded display (Cave "bubbly" vibe)
+  display: "Baloo2_800ExtraBold",
+  displaySemi: "Baloo2_700Bold",
   displayItalic: "Fraunces_400Regular_Italic",
   body: "DMSans_400Regular",
-  bodyMedium: "DMSans_500Medium",
-  bodyBold: "DMSans_700Bold",
-  label: "DMSans_600SemiBold",
+  bodyMedium: "Baloo2_600SemiBold",
+  bodyBold: "Baloo2_700Bold",
+  label: "Baloo2_600SemiBold",
 };

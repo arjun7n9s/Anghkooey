@@ -10,13 +10,16 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AnimatedChips } from "../../components/AnimatedChips";
-import { PrimaryButton } from "../../components/PrimaryButton";
+import { AngkMark } from "../../components/AngkMark";
+import { CapsuleNav } from "../../components/CapsuleNav";
+import { PillButton } from "../../components/PillButton";
 import { deleteBoxItem, updateBoxMeta } from "../../lib/boxes";
 import { api, type Box } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { fonts } from "../../lib/typography";
-import { card, radius, space, theme } from "../../lib/theme";
+import { cave, space, theme } from "../../lib/theme";
 
 export default function LogScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
@@ -59,7 +62,7 @@ export default function LogScreen() {
 
   async function persistTranscript(text: string) {
     if (!token || !text.trim()) {
-      setError("Say or type what’s inside the box first.");
+      setError("Say or type what's inside the box first.");
       return;
     }
     setSaving(true);
@@ -79,7 +82,7 @@ export default function LogScreen() {
   }
 
   async function saveMeta() {
-    if (!token) return;
+    if (!token || !isOwner) return;
     try {
       await updateBoxMeta(token, {
         locationHint: locationHint.trim(),
@@ -101,6 +104,7 @@ export default function LogScreen() {
   }
 
   async function startRecording() {
+    if (!isOwner) return;
     setError("");
     await Audio.requestPermissionsAsync();
     await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
@@ -132,275 +136,294 @@ export default function LogScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator color={theme.stamp} size="large" />
-      </View>
+      <SafeAreaView style={styles.safe}>
+        <ActivityIndicator color={theme.stamp} size="large" style={{ marginTop: 80 }} />
+      </SafeAreaView>
     );
   }
 
   if (error && !box) {
     return (
-      <View style={styles.center}>
+      <SafeAreaView style={styles.safe}>
         <Text style={styles.error}>{error}</Text>
-        <PrimaryButton label="Back home" onPress={() => router.replace("/")} />
-      </View>
+        <PillButton label="Back home" onPress={() => router.replace("/")} variant="primary" size="md" />
+      </SafeAreaView>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.sectionLabel}>BOX NAME</Text>
-      {isOwner ? (
-        <TextInput
-          style={styles.labelInput}
-          value={boxLabel}
-          onChangeText={setBoxLabel}
-          onBlur={saveMeta}
-          placeholder="Box #14 or Garage gear"
-          placeholderTextColor={theme.faded}
-        />
-      ) : (
-        <Text style={styles.labelReadonly}>{boxLabel || box?.label}</Text>
-      )}
+    <SafeAreaView style={styles.safe}>
+      <CapsuleNav left={<AngkMark size={28} />} title="LOG" />
 
-      <Text style={styles.boxNumber}>{boxLabel || box?.label}</Text>
-      {!isOwner ? (
-        <Text style={styles.sharedView}>Shared with you — view only</Text>
-      ) : null}
-
-      {isOwner ? (
-        <>
-          <View style={styles.modeRow}>
-            <Pressable
-              style={[styles.modeBtn, saveMode === "replace" && styles.modeActive]}
-              onPress={() => setSaveMode("replace")}
-            >
-              <Text style={[styles.modeText, saveMode === "replace" && styles.modeTextActive]}>Replace all</Text>
-            </Pressable>
-            <Pressable
-              style={[styles.modeBtn, saveMode === "append" && styles.modeActive]}
-              onPress={() => setSaveMode("append")}
-            >
-              <Text style={[styles.modeText, saveMode === "append" && styles.modeTextActive]}>Add items</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.micWrap}>
-            <Pressable
-              style={[styles.micCircle, recording && styles.micCircleActive]}
-              onPressIn={startRecording}
-              onPressOut={stopAndSave}
-              disabled={saving}
-            >
-              {saving && !recording ? (
-                <ActivityIndicator color={theme.paper} size="large" />
-              ) : (
-                <View style={styles.micInner}>
-                  <View style={[styles.micPulse, recording && styles.micPulseRecording]} />
-                  <Text style={styles.micText}>{recording ? "Listening…" : "Hold to speak"}</Text>
-                </View>
-              )}
-            </Pressable>
-            <Text style={styles.micHint}>Tell this box what&apos;s inside while you pack.</Text>
-          </View>
-
-          <Text style={styles.sectionLabel}>OR TYPE IT</Text>
-          <TextInput
-            style={styles.input}
-            multiline
-            placeholder="Canon camera, HDMI cables, charger…"
-            placeholderTextColor={theme.faded}
-            value={manualText}
-            onChangeText={setManualText}
-          />
-          <PrimaryButton
-            label="Save typed list"
-            onPress={() => persistTranscript(manualText)}
-            disabled={saving || !manualText.trim()}
-          />
-        </>
-      ) : null}
-
-      <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
-      {isOwner ? (
-        <TextInput
-          style={styles.inputSingle}
-          placeholder="Garage, top shelf, far right…"
-          placeholderTextColor={theme.faded}
-          value={locationHint}
-          onChangeText={setLocationHint}
-          onBlur={saveMeta}
-        />
-      ) : box?.locationHint ? (
-        <Text style={styles.locationReadonly}>📍 {box.locationHint}</Text>
-      ) : (
-        <Text style={styles.locationEmpty}>No location logged yet.</Text>
-      )}
-
-      {error ? <Text style={styles.errorInline}>{error}</Text> : null}
-      {saved ? <Text style={styles.saved}>Saved to {boxLabel || box?.label}</Text> : null}
-
-      {transcript ? (
-        <View style={styles.quote}>
-          <Text style={styles.quoteLabel}>Your log</Text>
-          <Text style={styles.quoteText}>{transcript}</Text>
-        </View>
-      ) : null}
-
-      {items.length > 0 && (
-        <View style={styles.chipsWrap}>
-          <Text style={styles.sectionLabel}>
-            {isOwner ? "ITEMS · TAP × TO REMOVE" : "ITEMS"}
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <View style={styles.hero}>
+          <Text style={styles.heroLabel}>BOX</Text>
+          <Text style={styles.heroTitle}>{boxLabel || box?.label || "Untitled box"}</Text>
+          <Text style={styles.heroSub}>
+            {!isOwner
+              ? "Shared with you — view only"
+              : box?.locationHint || "Tell this box what's inside"}
           </Text>
-          <AnimatedChips key={chipKey} items={items} onRemove={isOwner ? removeItem : undefined} />
         </View>
-      )}
 
-      {isOwner && items.length > 0 && (
-        <View style={styles.shareSection}>
-          <Text style={styles.sectionLabel}>SHARE THIS BOX</Text>
-          <Text style={styles.shareHint}>Anyone you share with can scan this QR and find what you stored.</Text>
+        {isOwner ? (
+          <>
+            <View style={styles.modeRow}>
+              <Pressable
+                style={[styles.modeBtn, saveMode === "replace" && styles.modeActive]}
+                onPress={() => setSaveMode("replace")}
+              >
+                <Text style={[styles.modeText, saveMode === "replace" && styles.modeTextActive]}>Replace all</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modeBtn, saveMode === "append" && styles.modeActive]}
+                onPress={() => setSaveMode("append")}
+              >
+                <Text style={[styles.modeText, saveMode === "append" && styles.modeTextActive]}>Add items</Text>
+              </Pressable>
+            </View>
+
+            <View style={styles.micWrap}>
+              <Pressable
+                style={[styles.micCircle, recording && styles.micCircleActive, cave.lift]}
+                onPressIn={startRecording}
+                onPressOut={stopAndSave}
+                disabled={saving}
+              >
+                {saving && !recording ? (
+                  <ActivityIndicator color={theme.paper} size="large" />
+                ) : (
+                  <View style={styles.micInner}>
+                    <View style={[styles.micRing, recording && styles.micRingActive]} />
+                    <Text style={styles.micText}>{recording ? "Listening…" : "Hold to speak"}</Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+
+            <Text style={styles.sectionLabel}>OR TYPE IT</Text>
+            <TextInput
+              style={styles.input}
+              multiline
+              placeholder="Canon camera, HDMI cables, charger…"
+              placeholderTextColor={theme.faded}
+              value={manualText}
+              onChangeText={setManualText}
+            />
+            <PillButton
+              label="Save typed list"
+              onPress={() => persistTranscript(manualText)}
+              variant="primary"
+              size="md"
+              disabled={saving || !manualText.trim()}
+              style={styles.fullBtn}
+            />
+          </>
+        ) : null}
+
+        {items.length > 0 ? (
+          <View style={[styles.itemsPanel, cave.heroCard, { borderRadius: cave.scoop }]}>
+            <Text style={styles.panelLabel}>{isOwner ? "ITEMS · TAP × TO REMOVE" : "ITEMS"}</Text>
+            <AnimatedChips key={chipKey} items={items} onRemove={isOwner ? removeItem : undefined} />
+          </View>
+        ) : null}
+
+        <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
+        {isOwner ? (
           <TextInput
             style={styles.inputSingle}
-            placeholder="partner@email.com"
+            placeholder="Garage, top shelf, far right…"
             placeholderTextColor={theme.faded}
-            value={shareEmail}
-            onChangeText={setShareEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
+            value={locationHint}
+            onChangeText={setLocationHint}
+            onBlur={saveMeta}
           />
-          <PrimaryButton
-            label="Share with this email"
-            onPress={async () => {
-              const email = shareEmail.trim();
-              if (!email || !token) return;
-              try {
-                setShareStatus("");
-                await api.ensureAccount(email, "demo-password-123");
-                await api.shareBox(token, email, "add");
-                setShareStatus(`Shared with ${email}. They can scan this QR and see what's inside.`);
-                setShareEmail("");
-              } catch (e) {
-                setShareStatus(e instanceof Error ? e.message : "Share failed");
-              }
-            }}
-            style={{ marginTop: space.sm }}
-          />
-          {shareStatus ? <Text style={styles.saved}>{shareStatus}</Text> : null}
-        </View>
-      )}
+        ) : box?.locationHint ? (
+          <Text style={styles.locationReadonly}>📍 {box.locationHint}</Text>
+        ) : (
+          <Text style={styles.locationEmpty}>No location logged yet.</Text>
+        )}
 
-      {saved && (
-        <PrimaryButton label="Find something else" onPress={() => router.push("/find")} style={{ marginTop: space.lg }} />
-      )}
-    </ScrollView>
+        {transcript ? (
+          <View style={styles.quote}>
+            <Text style={styles.quoteLabel}>Your log</Text>
+            <Text style={styles.quoteText}>{transcript}</Text>
+          </View>
+        ) : null}
+
+        {error ? <Text style={styles.errorInline}>{error}</Text> : null}
+        {saved ? <Text style={styles.saved}>Saved to {boxLabel || box?.label}</Text> : null}
+
+        {isOwner && items.length > 0 ? (
+          <View style={[styles.sharePanel, cave.heroCard, { borderRadius: cave.scoop, padding: space.xl }]}>
+            <Text style={styles.panelLabel}>SHARE THIS BOX</Text>
+            <Text style={styles.shareHint}>
+              Anyone you share with can scan this QR and find what you stored.
+            </Text>
+            <TextInput
+              style={styles.inputSingle}
+              placeholder="partner@email.com"
+              placeholderTextColor={theme.faded}
+              value={shareEmail}
+              onChangeText={setShareEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <PillButton
+              label="Share with this email"
+              onPress={async () => {
+                const email = shareEmail.trim();
+                if (!email || !token) return;
+                try {
+                  setShareStatus("");
+                  await api.ensureAccount(email, "demo-password-123");
+                  await api.shareBox(token, email, "add");
+                  setShareStatus(`Shared with ${email}.`);
+                  setShareEmail("");
+                } catch (e) {
+                  setShareStatus(e instanceof Error ? e.message : "Share failed");
+                }
+              }}
+              variant="primary"
+              size="md"
+              style={styles.fullBtn}
+            />
+            {shareStatus ? <Text style={styles.saved}>{shareStatus}</Text> : null}
+          </View>
+        ) : null}
+
+        {saved ? (
+          <PillButton label="Find something else" onPress={() => router.push("/find")} variant="ghost" size="md" style={styles.fullBtn} />
+        ) : null}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: space.xl, gap: space.md, backgroundColor: theme.paper },
-  center: { flex: 1, justifyContent: "center", padding: space.xl, gap: space.md, backgroundColor: theme.paper },
-  sectionLabel: {
+  safe: { flex: 1, backgroundColor: theme.paper },
+  scroll: {
+    padding: space.xxl,
+    gap: space.xl,
+    maxWidth: 800,
+    alignSelf: "center",
+    width: "100%",
+  },
+  hero: { alignItems: "center", gap: space.sm },
+  heroLabel: {
     fontFamily: fonts.label,
     fontSize: 11,
     color: theme.faded,
-    letterSpacing: 1.2,
+    letterSpacing: 1.4,
+    textTransform: "uppercase",
   },
-  labelInput: {
-    fontFamily: fonts.bodyMedium,
-    backgroundColor: theme.paperDeep,
+  heroTitle: {
+    fontFamily: fonts.display,
+    fontSize: 32,
     color: theme.ink,
-    padding: card.tight,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: theme.line,
-    fontSize: 15,
+    textAlign: "center",
+    letterSpacing: -1,
   },
-  boxNumber: { fontFamily: fonts.display, fontSize: 48, color: theme.ink, letterSpacing: -1 },
-  sharedView: { fontFamily: fonts.bodyBold, color: theme.faded, marginBottom: space.xs },
-  labelReadonly: { fontFamily: fonts.bodyMedium, fontSize: 15, color: theme.inkSoft },
-  locationReadonly: { fontFamily: fonts.body, fontSize: 15, color: theme.inkSoft, fontStyle: "italic" },
-  locationEmpty: { fontFamily: fonts.body, fontSize: 14, color: theme.faded, fontStyle: "italic" },
+  heroSub: {
+    fontFamily: fonts.displayItalic,
+    fontSize: 14,
+    color: theme.inkSoft,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
   modeRow: { flexDirection: "row", gap: space.sm },
   modeBtn: {
     flex: 1,
     paddingVertical: space.md,
-    borderRadius: radius.md,
+    borderRadius: cave.pill,
     alignItems: "center",
-    borderWidth: 1,
+    borderWidth: cave.hairline,
     borderColor: theme.line,
     backgroundColor: theme.paperDeep,
   },
   modeActive: { borderColor: theme.stamp, backgroundColor: theme.paper },
-  modeText: { fontFamily: fonts.bodyMedium, color: theme.faded, fontSize: 13 },
-  modeTextActive: { color: theme.stamp, fontFamily: fonts.bodyBold },
-  micWrap: { alignItems: "center", marginVertical: space.xxl, gap: space.lg },
+  modeText: { fontFamily: fonts.bodyMedium, color: theme.creamSoft, fontSize: 13 },
+  modeTextActive: { color: theme.night, fontFamily: fonts.bodyBold },
+  micWrap: { alignItems: "center", marginVertical: space.xl },
   micCircle: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: theme.stamp,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: theme.night,
+    borderWidth: 3,
+    borderColor: theme.stamp,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: theme.stamp,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 24,
-    elevation: 8,
   },
-  micCircleActive: { backgroundColor: "#9E3A2E", transform: [{ scale: 1.04 }] },
-  micInner: { alignItems: "center", gap: space.sm },
-  micPulse: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: theme.paper,
-    opacity: 0.7,
+  micCircleActive: { backgroundColor: "#C0392B", transform: [{ scale: 1.04 }] },
+  micInner: { alignItems: "center", gap: space.md },
+  micRing: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 3,
+    borderColor: theme.stamp,
   },
-  micPulseRecording: { opacity: 1, transform: [{ scale: 1.4 }] },
-  micText: { fontFamily: fonts.bodyBold, color: theme.paper, fontSize: 15, letterSpacing: 0.3 },
-  micHint: { fontFamily: fonts.body, color: theme.faded, fontSize: 13, fontStyle: "italic" },
+  micRingActive: { borderColor: theme.cream, transform: [{ scale: 1.08 }] },
+  micText: { fontFamily: fonts.bodyBold, color: theme.cream, fontSize: 15 },
+  sectionLabel: {
+    fontFamily: fonts.label,
+    fontSize: 12,
+    color: theme.faded,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  panelLabel: {
+    fontFamily: fonts.label,
+    fontSize: 12,
+    color: theme.creamFaint,
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
   input: {
-    fontFamily: fonts.body,
-    backgroundColor: theme.paperDeep,
-    color: theme.ink,
-    padding: card.tight,
-    borderRadius: radius.md,
+    fontFamily: fonts.bodyMedium,
+    backgroundColor: theme.stamp,
+    color: theme.night,
+    padding: cave.field,
+    borderRadius: cave.card,
     fontSize: 15,
-    borderWidth: 1,
-    borderColor: theme.line,
+    borderWidth: 2,
+    borderColor: theme.night,
     minHeight: 80,
     textAlignVertical: "top",
   },
   inputSingle: {
-    fontFamily: fonts.body,
-    backgroundColor: theme.paperDeep,
-    color: theme.ink,
-    padding: card.tight,
-    borderRadius: radius.md,
+    fontFamily: fonts.bodyMedium,
+    backgroundColor: theme.stamp,
+    color: theme.night,
+    padding: cave.field,
+    borderRadius: cave.pill,
     fontSize: 15,
-    borderWidth: 1,
-    borderColor: theme.line,
+    borderWidth: 2,
+    borderColor: theme.night,
   },
+  itemsPanel: { gap: space.sm },
   quote: {
-    backgroundColor: theme.paperDeep,
-    padding: card.tight,
-    borderRadius: radius.lg,
-    borderLeftWidth: 3,
+    backgroundColor: theme.night,
+    padding: cave.field,
+    borderRadius: cave.card,
+    borderLeftWidth: 4,
     borderLeftColor: theme.stamp,
   },
-  quoteLabel: { fontFamily: fonts.label, color: theme.faded, marginBottom: space.sm },
-  quoteText: { fontFamily: fonts.body, color: theme.ink, lineHeight: 22, fontStyle: "italic" },
-  chipsWrap: { gap: space.sm },
-  shareSection: {
-    marginTop: space.sm,
-    paddingTop: space.lg,
-    borderTopWidth: 1,
-    borderTopColor: theme.line,
-    gap: space.sm,
+  quoteLabel: { fontFamily: fonts.label, color: theme.creamFaint, marginBottom: space.sm },
+  quoteText: { fontFamily: fonts.displayItalic, color: theme.cream, lineHeight: 22, fontStyle: "italic" },
+  sharePanel: { gap: space.sm },
+  shareHint: {
+    fontFamily: fonts.displayItalic,
+    fontSize: 14,
+    color: theme.creamSoft,
+    fontStyle: "italic",
+    lineHeight: 20,
   },
-  shareHint: { fontFamily: fonts.body, fontSize: 14, color: theme.inkSoft, lineHeight: 20 },
-  error: { fontFamily: fonts.body, color: theme.error, textAlign: "center" },
-  errorInline: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
-  saved: { fontFamily: fonts.bodyBold, color: theme.wax },
+  locationReadonly: { fontFamily: fonts.bodyMedium, fontSize: 15, color: theme.ink, fontStyle: "italic" },
+  locationEmpty: { fontFamily: fonts.body, fontSize: 14, color: theme.inkFaint, fontStyle: "italic" },
+  fullBtn: { width: "100%" },
+  error: { fontFamily: fonts.bodyBold, color: theme.night, textAlign: "center", padding: space.xl },
+  errorInline: { fontFamily: fonts.bodyBold, color: theme.night, fontSize: 13 },
+  saved: { fontFamily: fonts.bodyBold, color: theme.night },
 });

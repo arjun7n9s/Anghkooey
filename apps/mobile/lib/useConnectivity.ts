@@ -16,8 +16,12 @@ export function useConnectivity(): boolean {
       }
 
       try {
-        const res = await fetch(`${url}/auth/v1/health`, { method: "GET" });
-        setOffline(!res.ok);
+        // Reaching the server AT ALL means we're online — even a 401/404 counts.
+        await fetch(`${url}/auth/v1/health`, {
+          method: "GET",
+          headers: { apikey: key },
+        });
+        setOffline(false);
       } catch {
         setOffline(Platform.OS === "web" ? !navigator.onLine : true);
       }

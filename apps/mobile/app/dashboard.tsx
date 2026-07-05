@@ -1,19 +1,21 @@
+import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
-import { router } from "expo-router";
-import { EmptyState } from "../components/EmptyState";
-import { Mark } from "../components/Mark";
-import { Screen } from "../components/Screen";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AnimatedHero } from "../components/AnimatedHero";
+import { AngkMark } from "../components/AngkMark";
+import { CapsuleNav } from "../components/CapsuleNav";
+import { PillButton } from "../components/PillButton";
+import { StatRow } from "../components/StatRow";
 import { useAuth } from "../lib/auth";
 import { listBoxesDetailed, type BoxDetail } from "../lib/boxes";
-import { card, radius, space, theme } from "../lib/theme";
+import { cave, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
 
 function CountUp({ value }: { value: number }) {
@@ -28,52 +30,13 @@ function CountUp({ value }: { value: number }) {
     return () => anim.removeListener(listener);
   }, [value, anim]);
 
-  return <Text style={styles.statNum}>{display}</Text>;
-}
-
-function BoxCard({ box, index, cardWidth }: { box: BoxDetail; index: number; cardWidth: number | string }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(12)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        delay: index * 70,
-        useNativeDriver: true,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 400,
-        delay: index * 70,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [index, opacity, translateY]);
-
-  return (
-    <Animated.View style={[styles.boxCard, { width: cardWidth, opacity, transform: [{ translateY }] }]}>
-      <View style={styles.boxHeader}>
-        <Text style={styles.boxLabel}>{box.label}</Text>
-        {box.isShared ? <Text style={styles.sharedBadge}>Shared with you</Text> : null}
-      </View>
-      {box.locationHint ? <Text style={styles.boxHint}>📍 {box.locationHint}</Text> : null}
-      <Text style={styles.boxItems}>
-        {box.items.slice(0, 4).map((i) => i.name).join(" · ") || "Empty box"}
-      </Text>
-      {box.items.length > 4 ? <Text style={styles.boxMore}>+{box.items.length - 4} more</Text> : null}
-    </Animated.View>
-  );
+  return <Text style={styles.countUp}>{display}</Text>;
 }
 
 export default function Dashboard() {
   const { session } = useAuth();
   const [boxes, setBoxes] = useState<BoxDetail[]>([]);
   const [loading, setLoading] = useState(true);
-  const { width } = useWindowDimensions();
-  const isWide = width >= 900;
-  const cardWidth = isWide ? "31%" : "100%";
 
   useEffect(() => {
     if (!session) return;
@@ -84,132 +47,88 @@ export default function Dashboard() {
 
   if (!session) {
     return (
-      <Screen>
+      <SafeAreaView style={styles.safe}>
         <Text style={styles.body}>Sign in to view your dashboard.</Text>
-      </Screen>
+      </SafeAreaView>
     );
   }
 
   const loggedBoxes = boxes.filter((b) => b.itemCount > 0);
   const totalItems = boxes.reduce((sum, b) => sum + b.itemCount, 0);
   const categories = new Set(boxes.flatMap((b) => b.items.map((i) => i.category ?? "other")));
+  const oldest = [...loggedBoxes].sort(
+    (a, b) => new Date(a.lastTouched).getTime() - new Date(b.lastTouched).getTime(),
+  )[0];
+  const oldestLabel = oldest?.label;
+  const oldestDate = oldest
+    ? new Date(oldest.lastTouched).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+    : undefined;
 
   return (
-    <Screen style={{ paddingHorizontal: 0 }}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.wordmarkRow}>
-          <Mark size={56} weight="bold" />
-          <Text style={styles.wordmark}>Anghkooey</Text>
-        </View>
-        <Text style={styles.heroEyebrow}>YOUR ARCHIVE</Text>
-        <Text style={styles.heroTitle}>Dashboard</Text>
-        <Text style={styles.sub}>Where your stuff remembers you.</Text>
+    <SafeAreaView style={styles.safe}>
+      <CapsuleNav left={<AngkMark size={28} />} title="DASHBOARD" />
 
-        <View style={styles.statsRow}>
-          <View style={styles.statCard}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.heroBlock}>
+          <AnimatedHero
+            eyebrow="YOUR ARCHIVE"
+            wordmark="Dashboard"
+            sub="Where your stuff remembers you."
+            wordmarkSize={72}
+          />
+          <View style={styles.countRow}>
             <CountUp value={loggedBoxes.length} />
-            <Text style={styles.statLabel}>logged</Text>
+            <Text style={styles.countLabel}> boxes logged</Text>
           </View>
-          <View style={styles.statCard}>
-            <CountUp value={totalItems} />
-            <Text style={styles.statLabel}>items</Text>
-          </View>
-          <View style={styles.statCard}>
-            <CountUp value={categories.size} />
-            <Text style={styles.statLabel}>categories</Text>
-          </View>
+        </View>
+
+        <View style={[styles.statCard, cave.heroCard, { borderRadius: cave.scoop, padding: space.xxl }]}>
+          <StatRow label="Logged" value={loggedBoxes.length} />
+          <StatRow label="Items" value={totalItems} hint={`Across ${categories.size} categories`} />
+          <StatRow
+            label="Oldest box"
+            value={oldestLabel ?? "—"}
+            hint={oldestDate ? `last touched ${oldestDate}` : undefined}
+            isLast
+          />
         </View>
 
         {loading ? (
           <Text style={styles.body}>Loading…</Text>
         ) : loggedBoxes.length === 0 ? (
-          <EmptyState
-            title="Begin your archive."
-            body="Print your labels, stick a QR on a box, and speak what's inside while you pack."
-            actionLabel="Print labels"
-            onAction={() => router.push("/print")}
-          />
+          <Text style={styles.body}>Begin your archive — log your first box.</Text>
         ) : (
           <View style={styles.grid}>
-            {loggedBoxes.map((b, index) => (
-              <BoxCard key={b.id} box={b} index={index} cardWidth={cardWidth} />
+            {loggedBoxes.map((b) => (
+              <PillButton
+                key={b.id}
+                label={`${b.isShared ? "shared · " : ""}${b.label} · ${b.itemCount}`}
+                onPress={() => router.push(`/log/${b.qrToken}`)}
+                variant="ghost"
+                size="md"
+              />
             ))}
           </View>
         )}
       </ScrollView>
-    </Screen>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: theme.paper },
   container: {
-    padding: space.hero,
-    gap: space.lg,
+    padding: space.xxl,
+    gap: space.xl,
     maxWidth: 1200,
-    minWidth: 320,
     alignSelf: "center",
     width: "100%",
   },
-  wordmarkRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-  },
-  wordmark: {
-    fontFamily: fonts.display,
-    fontSize: 64,
-    color: theme.ink,
-    letterSpacing: -2,
-  },
-  heroEyebrow: { fontFamily: fonts.label, fontSize: 12, color: theme.faded, letterSpacing: 2 },
-  heroTitle: {
-    fontFamily: fonts.display,
-    fontSize: 72,
-    color: theme.ink,
-    letterSpacing: -2,
-  },
-  sub: { fontFamily: fonts.body, fontSize: 18, color: theme.inkSoft, marginBottom: space.sm },
-  statsRow: { flexDirection: "row", gap: space.lg },
-  statCard: {
-    flex: 1,
-    backgroundColor: theme.paperDeep,
-    padding: card.hero,
-    borderRadius: radius.lg,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: theme.line,
-  },
-  statNum: { fontFamily: fonts.display, fontSize: 56, color: theme.ink, letterSpacing: -2 },
-  statLabel: {
-    fontFamily: fonts.label,
-    fontSize: 11,
-    color: theme.faded,
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    marginTop: space.xs,
-  },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: card.default },
-  boxCard: {
-    minWidth: 280,
-    backgroundColor: theme.paperDeep,
-    padding: card.hero,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: theme.line,
-    gap: space.sm,
-  },
-  boxHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: space.sm },
-  boxLabel: { fontFamily: fonts.displaySemi, fontSize: 28, color: theme.ink, letterSpacing: -0.5, flex: 1 },
-  sharedBadge: {
-    fontFamily: fonts.label,
-    fontSize: 10,
-    color: theme.indigo,
-    letterSpacing: 0.8,
-    textTransform: "uppercase",
-    marginTop: space.xs,
-  },
-  boxHint: { fontFamily: fonts.body, fontSize: 14, color: theme.inkSoft, fontStyle: "italic" },
-  boxItems: { fontFamily: fonts.body, fontSize: 15, color: theme.ink, lineHeight: 22 },
-  boxMore: { fontFamily: fonts.bodyBold, fontSize: 13, color: theme.stamp },
-  body: { fontFamily: fonts.body, fontSize: 16, color: theme.inkSoft, lineHeight: 24 },
+  heroBlock: { alignItems: "center", gap: space.lg },
+  countRow: { flexDirection: "row", alignItems: "baseline", marginTop: space.sm },
+  countUp: { fontFamily: fonts.display, fontSize: 44, color: theme.night, letterSpacing: -1 },
+  countLabel: { fontFamily: fonts.body, fontSize: 16, color: theme.inkSoft },
+  statCard: { gap: 0 },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
+  body: { fontFamily: fonts.body, fontSize: 16, color: theme.inkSoft, textAlign: "center" },
 });

@@ -1,7 +1,7 @@
-import { useRef } from "react";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
-import { categoryColor, card, radius, space, theme } from "../lib/theme";
+import { StyleSheet, Text, View } from "react-native";
+import { PillButton } from "./PillButton";
 import { fonts } from "../lib/typography";
+import { theme } from "../lib/theme";
 import type { FindResult } from "../lib/types";
 
 export function SpecimenCard({
@@ -13,136 +13,68 @@ export function SpecimenCard({
   onPress: () => void;
   rank?: number;
 }) {
-  const scale = useRef(new Animated.Value(1)).current;
-
   const date = new Date(result.lastTouched).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
-
-  function pressIn() {
-    Animated.spring(scale, {
-      toValue: 0.98,
-      useNativeDriver: true,
-      speed: 20,
-      bounciness: 4,
-    }).start();
-  }
-
-  function pressOut() {
-    Animated.spring(scale, {
-      toValue: 1,
-      useNativeDriver: true,
-      speed: 20,
-      bounciness: 4,
-    }).start();
-  }
-
-  const chips = result.items.slice(0, 4);
+  const itemCount = result.items.length;
 
   return (
-    <Pressable onPress={onPress} onPressIn={pressIn} onPressOut={pressOut}>
-      <Animated.View style={[styles.card, { transform: [{ scale }] }]}>
-        <View style={styles.topRow}>
-          <Text style={styles.label}>{result.label}</Text>
-          {rank !== undefined ? <Text style={styles.rank}>#{rank}</Text> : null}
-        </View>
-
-        {chips.length > 0 ? (
-          <View style={styles.chipRow}>
-            {chips.map((item) => {
-              const color = categoryColor(item.category);
-              return (
-                <View
-                  key={item.id}
-                  style={[styles.chip, { borderColor: color, backgroundColor: theme.paperDeep }]}
-                >
-                  <Text style={[styles.chipText, { color }]} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        ) : null}
-
-        <View style={styles.quote}>
-          <Text style={styles.quoteText} numberOfLines={3}>
-            {result.snippet}
-          </Text>
-        </View>
-
-        <Text style={styles.touched}>
-          📅 Last touched {date}
-          {result.locationHint ? ` · ${result.locationHint}` : ""}
+    <View style={styles.wrap}>
+      <PillButton
+        label={`${result.label}  ·  ${itemCount} item${itemCount === 1 ? "" : "s"}`}
+        onPress={onPress}
+        variant="ghost"
+        size="md"
+        style={styles.full}
+        iconRight={
+          rank === 1 ? (
+            <Text style={styles.topMatch}>Top match</Text>
+          ) : undefined
+        }
+      />
+      {result.locationHint ? (
+        <Text style={styles.subLine} numberOfLines={1}>
+          From {result.locationHint}. Last touched {date}.
         </Text>
-      </Animated.View>
-    </Pressable>
+      ) : null}
+      {result.snippet ? (
+        <Text style={styles.snippet} numberOfLines={2}>
+          {result.snippet}
+        </Text>
+      ) : null}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
+  wrap: { gap: 6 },
+  full: { width: "100%" },
+  topMatch: {
+    fontFamily: fonts.label,
+    fontSize: 10,
+    color: theme.cream,
     backgroundColor: theme.paperDeep,
-    padding: card.default,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: theme.line,
-    gap: space.md,
-  },
-  topRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: space.md,
-  },
-  rank: {
-    fontFamily: fonts.display,
-    fontSize: 11,
-    color: theme.faded,
-    letterSpacing: -0.3,
-    marginTop: space.xs,
-  },
-  label: {
-    fontFamily: fonts.displaySemi,
-    fontSize: 22,
-    color: theme.ink,
-    flex: 1,
-    letterSpacing: -0.5,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space.sm,
-  },
-  chip: {
-    borderWidth: 1,
-    borderRadius: radius.pill,
-    paddingHorizontal: space.sm,
-    paddingVertical: space.xs,
-    maxWidth: "100%",
-  },
-  chipText: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-  },
-  quote: {
-    borderLeftWidth: 3,
-    borderLeftColor: theme.stamp,
-    paddingLeft: space.md,
+    paddingHorizontal: 8,
     paddingVertical: 2,
+    borderRadius: 999,
+    overflow: "hidden",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
   },
-  quoteText: {
+  subLine: {
     fontFamily: fonts.displayItalic,
-    fontSize: 15,
+    fontSize: 14,
     color: theme.inkSoft,
     fontStyle: "italic",
-    lineHeight: 22,
+    maxWidth: 480,
   },
-  touched: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    color: theme.faded,
+  snippet: {
+    fontFamily: fonts.displayItalic,
+    fontSize: 16,
+    color: theme.inkSoft,
+    fontStyle: "italic",
+    maxWidth: 540,
   },
 });

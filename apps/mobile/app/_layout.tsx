@@ -11,13 +11,27 @@ import {
   DMSans_700Bold,
   useFonts as useDmSans,
 } from "@expo-google-fonts/dm-sans";
+import {
+  Baloo2_500Medium,
+  Baloo2_600SemiBold,
+  Baloo2_700Bold,
+  Baloo2_800ExtraBold,
+  useFonts as useBaloo,
+} from "@expo-google-fonts/baloo-2";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { OfflineBanner } from "../components/OfflineBanner";
 import { AuthProvider, useAuth } from "../lib/auth";
 import { theme } from "../lib/theme";
+
+const fadeScreen = {
+  headerShown: false as const,
+  animation: "fade" as const,
+  animationDuration: 180,
+};
 
 function LoadingScreen() {
   return (
@@ -50,16 +64,18 @@ function GuardedStack() {
         headerTitleStyle: { fontWeight: "600", fontFamily: "DMSans_600SemiBold" },
         contentStyle: { backgroundColor: theme.paper },
         headerShadowVisible: false,
+        animation: "fade",
+        animationDuration: 180,
       }}
     >
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="dashboard" options={{ title: "Dashboard", headerShown: false }} />
-      <Stack.Screen name="boxes" options={{ title: "My boxes" }} />
+      <Stack.Screen name="login" options={fadeScreen} />
+      <Stack.Screen name="index" options={fadeScreen} />
+      <Stack.Screen name="dashboard" options={fadeScreen} />
+      <Stack.Screen name="boxes" options={fadeScreen} />
       <Stack.Screen name="print" options={{ title: "Print labels" }} />
-      <Stack.Screen name="scan" options={{ title: "Scan label" }} />
-      <Stack.Screen name="find" options={{ title: "Find" }} />
-      <Stack.Screen name="log/[token]" options={{ title: "Log box" }} />
+      <Stack.Screen name="scan" options={{ title: "Scan label", ...fadeScreen }} />
+      <Stack.Screen name="find" options={fadeScreen} />
+      <Stack.Screen name="log/[token]" options={fadeScreen} />
       <Stack.Screen name="locate/[token]" options={{ title: "Locate" }} />
     </Stack>
   );
@@ -77,14 +93,22 @@ export default function RootLayout() {
     DMSans_600SemiBold,
     DMSans_700Bold,
   });
+  const [balooLoaded] = useBaloo({
+    Baloo2_500Medium,
+    Baloo2_600SemiBold,
+    Baloo2_700Bold,
+    Baloo2_800ExtraBold,
+  });
 
-  if (!frauncesLoaded || !dmLoaded) return <LoadingScreen />;
+  if (!frauncesLoaded || !dmLoaded || !balooLoaded) return <LoadingScreen />;
 
   return (
-    <AuthProvider>
-      <StatusBar style="dark" />
-      <OfflineBanner />
-      <GuardedStack />
-    </AuthProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <AuthProvider>
+        <StatusBar style="dark" />
+        <OfflineBanner />
+        <GuardedStack />
+      </AuthProvider>
+    </GestureHandlerRootView>
   );
 }

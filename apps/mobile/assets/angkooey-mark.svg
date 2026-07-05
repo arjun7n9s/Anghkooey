@@ -1,0 +1,68 @@
+<!-- RENDERED AT 256x256, NO FILTERS, KEEP IT FLAT. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <style>
+    @keyframes drawCircle {
+      from { stroke-dashoffset: 180; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes pulseA {
+      0%, 100% { transform: scale(0.92); }
+      50% { transform: scale(1.06); }
+    }
+    @keyframes drawLine {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .circle-draw {
+      stroke-dasharray: 180;
+      stroke-dashoffset: 180;
+      animation: drawCircle 0.8s ease-out infinite alternate;
+    }
+    .letter-a {
+      transform-origin: 128px 108px;
+      animation: pulseA 2.4s ease-in-out infinite;
+    }
+    .hairline-draw {
+      transform-origin: center;
+      animation: drawLine 1.2s ease-out infinite alternate;
+    }
+  </style>
+  <circle
+    class="circle-draw"
+    cx="128"
+    cy="108"
+    r="56"
+    fill="none"
+    stroke="#2E5E4E"
+    stroke-width="4"
+    pathLength="180"
+  />
+  <text
+    class="letter-a"
+    x="128"
+    y="120"
+    text-anchor="middle"
+    font-family="Georgia, serif"
+    font-size="52"
+    font-weight="700"
+    fill="#C44B37"
+  >A</text>
+  <rect
+    class="hairline-draw"
+    x="88"
+    y="168"
+    width="80"
+    height="2"
+    fill="#C44B37"
+  />
+  <text
+    x="128"
+    y="208"
+    text-anchor="middle"
+    font-family="Georgia, serif"
+    font-size="14"
+    font-weight="700"
+    fill="#C44B37"
+    letter-spacing="0.3em"
+  >ANGHKOOEY</text>
+</svg>

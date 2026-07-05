@@ -16,7 +16,7 @@ export function OfflineBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: theme.error,
+    backgroundColor: theme.night,
     paddingVertical: 8,
     paddingHorizontal: 16,
     alignItems: "center",
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   text: {
     fontFamily: fonts.bodyBold,
     fontSize: 13,
-    color: theme.paper,
+    color: theme.stamp,
     textAlign: "center",
   },
 });

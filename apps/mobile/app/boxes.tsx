@@ -3,17 +3,33 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { EmptyState } from "../components/EmptyState";
-import { Screen } from "../components/Screen";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AngkMark } from "../components/AngkMark";
+import { CapsuleNav } from "../components/CapsuleNav";
+import { PillButton } from "../components/PillButton";
 import { listBoxes, type BoxSummary } from "../lib/boxes";
+import { cave, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
-import { card, radius, space, theme } from "../lib/theme";
+
+function StatusDot({ logged }: { logged: boolean }) {
+  return (
+    <View
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: logged ? theme.stamp : theme.creamFaint,
+        borderWidth: 1.5,
+        borderColor: theme.night,
+      }}
+    />
+  );
+}
 
 export default function BoxesScreen() {
   const [boxes, setBoxes] = useState<BoxSummary[]>([]);
@@ -40,18 +56,23 @@ export default function BoxesScreen() {
   const logged = boxes.filter((b) => b.itemCount > 0).length;
 
   return (
-    <Screen style={{ paddingHorizontal: 0 }}>
-      <View style={styles.header}>
-        <Text style={styles.title}>My boxes</Text>
-        <Text style={styles.sub}>
-          {logged} of {boxes.length} logged · tap to edit
-        </Text>
-      </View>
+    <SafeAreaView style={styles.safe}>
+      <CapsuleNav left={<AngkMark size={28} />} title="BOXES" />
+      <Text style={styles.subheader}>
+        {logged} of {boxes.length} logged
+      </Text>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       {loading ? (
         <ActivityIndicator color={theme.stamp} style={{ marginTop: space.xxl }} />
+      ) : boxes.length === 0 ? (
+        <View style={[styles.empty, cave.heroCard]}>
+          <Text style={styles.emptyTitle}>Begin your archive.</Text>
+          <Text style={styles.emptyBody}>
+            Your archive is empty. Stick a label on a box and speak what&apos;s inside.
+          </Text>
+        </View>
       ) : (
         <FlatList
           data={boxes}
@@ -67,77 +88,59 @@ export default function BoxesScreen() {
               tintColor={theme.stamp}
             />
           }
-          ListEmptyComponent={
-            <EmptyState
-              title="No labels yet"
-              body="Your account gets 24 box labels on signup. Print them from home to get started."
-              actionLabel="Print labels"
-              onAction={() => router.push("/print")}
-            />
-          }
           renderItem={({ item }) => (
-            <Pressable style={styles.row} onPress={() => router.push(`/log/${item.qrToken}`)}>
-              <View style={[styles.statusDot, item.itemCount > 0 && styles.statusLogged]} />
-              <View style={styles.rowMain}>
-                <Text style={styles.label}>{item.label}</Text>
-                {item.isShared ? <Text style={styles.sharedBadge}>Shared</Text> : null}
-                <Text style={styles.meta}>
-                  {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
-                  {item.locationHint ? ` · ${item.locationHint}` : ""}
-                </Text>
-                {item.preview ? (
-                  <Text style={styles.preview} numberOfLines={2}>
-                    {item.preview}
-                  </Text>
-                ) : (
-                  <Text style={styles.emptyRow}>Empty — tap to log</Text>
-                )}
-              </View>
-              <Text style={styles.chevron}>→</Text>
-            </Pressable>
+            <PillButton
+              label={`${item.isShared ? "(shared) " : ""}${item.label}`}
+              onPress={() => router.push(`/log/${item.qrToken}`)}
+              variant="ghost"
+              size="md"
+              style={styles.rowBtn}
+              iconRight={<StatusDot logged={item.itemCount > 0} />}
+            />
           )}
         />
       )}
-    </Screen>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: space.xl, paddingBottom: space.md, gap: space.xs },
-  title: { fontFamily: fonts.displaySemi, fontSize: 28, color: theme.ink },
-  sub: { fontFamily: fonts.body, color: theme.inkSoft, fontSize: 14 },
-  list: { paddingHorizontal: space.xl, paddingBottom: space.xl, gap: space.md },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.paperDeep,
-    borderRadius: radius.lg,
-    padding: card.default,
-    borderWidth: 1,
-    borderColor: theme.line,
-    marginBottom: space.md,
-    gap: space.md,
-  },
-  statusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: theme.faded,
-  },
-  statusLogged: { backgroundColor: theme.wax },
-  rowMain: { flex: 1, gap: space.xs },
-  label: { fontFamily: fonts.bodyBold, fontSize: 17, color: theme.ink },
-  sharedBadge: {
+  safe: { flex: 1, backgroundColor: theme.paper },
+  subheader: {
     fontFamily: fonts.label,
-    fontSize: 10,
-    color: theme.indigo,
-    letterSpacing: 0.8,
+    fontSize: 12,
+    color: theme.faded,
+    textAlign: "center",
+    letterSpacing: 1.2,
     textTransform: "uppercase",
-    alignSelf: "flex-start",
+    marginBottom: space.sm,
   },
-  meta: { fontFamily: fonts.body, fontSize: 12, color: theme.faded },
-  preview: { fontFamily: fonts.body, fontSize: 13, color: theme.inkSoft, fontStyle: "italic", marginTop: space.xs },
-  emptyRow: { fontFamily: fonts.body, fontSize: 13, color: theme.faded, fontStyle: "italic" },
-  chevron: { fontFamily: fonts.bodyBold, color: theme.stamp, fontSize: 18 },
-  error: { fontFamily: fonts.body, color: theme.error, paddingHorizontal: space.xl, marginBottom: space.sm },
+  list: { padding: space.xl, gap: space.md },
+  rowBtn: { width: "100%" },
+  empty: {
+    margin: space.xl,
+    padding: space.xxl,
+    alignItems: "center",
+    gap: space.sm,
+  },
+  emptyTitle: {
+    fontFamily: fonts.display,
+    fontSize: 26,
+    color: theme.cream,
+    textAlign: "center",
+  },
+  emptyBody: {
+    fontFamily: fonts.displayItalic,
+    fontSize: 15,
+    color: theme.creamSoft,
+    fontStyle: "italic",
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  error: {
+    fontFamily: fonts.bodyBold,
+    color: theme.night,
+    textAlign: "center",
+    paddingHorizontal: space.xl,
+  },
 });

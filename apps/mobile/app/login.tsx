@@ -1,11 +1,19 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { Screen } from "../components/Screen";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AnimatedHero } from "../components/AnimatedHero";
+import { AngkMark } from "../components/AngkMark";
+import { PillButton } from "../components/PillButton";
 import { useAuth } from "../lib/auth";
+import { cave, space, theme } from "../lib/theme";
 import { fonts } from "../lib/typography";
-import { card, radius, space, theme } from "../lib/theme";
 
 export default function LoginScreen() {
   const { signIn, signUp } = useAuth();
@@ -30,105 +38,85 @@ export default function LoginScreen() {
   }
 
   return (
-    <Screen style={styles.container}>
-      <Text style={styles.eyebrow}>YOUR BOX MEMORY</Text>
-      <Text style={styles.logo}>Anghkooey</Text>
-      <Text style={styles.epigraph}>
-        I moved last year. I packed 47 boxes. I labeled four of them.
-      </Text>
-      <Text style={styles.sub}>Open your archive of physical stuff.</Text>
-
-      <View style={styles.formCard}>
-        <TextInput
-          style={styles.input}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          placeholder="Email"
-          placeholderTextColor={theme.faded}
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-          placeholder="Password"
-          placeholderTextColor={theme.faded}
-          value={password}
-          onChangeText={setPassword}
+    <SafeAreaView style={styles.safe}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <AngkMark size={72} weight="bold" />
+        <AnimatedHero
+          eyebrow=""
+          wordmark="Anghkooey"
+          sub="I moved last year. I packed 47 boxes. I labeled four of them."
         />
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-
-        <PrimaryButton
-          label={loading ? "…" : mode === "signin" ? "Enter archive" : "Create archive"}
-          onPress={submit}
-          disabled={loading}
-        />
-      </View>
-
-      <Pressable
-        onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
-        style={({ pressed }) => [styles.switchWrap, pressed && styles.switchPressed]}
-      >
-        <Text style={styles.switch}>
-          {mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}
-        </Text>
-      </Pressable>
-    </Screen>
+        <View style={[styles.heroCard, cave.heroCard]}>
+          <Text style={styles.cardLabel}>BEGIN YOUR ARCHIVE</Text>
+          <TextInput
+            style={styles.input}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            placeholder="Email"
+            placeholderTextColor={theme.faded}
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            secureTextEntry
+            placeholder="Password"
+            placeholderTextColor={theme.faded}
+            value={password}
+            onChangeText={setPassword}
+          />
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+          <PillButton
+            label={loading ? "…" : mode === "signin" ? "Open the archive" : "Create archive"}
+            onPress={submit}
+            variant="primary"
+            size="lg"
+            disabled={loading}
+            style={styles.fullBtn}
+          />
+          <PillButton
+            label={mode === "signin" ? "Need an account? Sign up" : "Already have an account? Sign in"}
+            onPress={() => setMode(mode === "signin" ? "signup" : "signin")}
+            variant="ghost"
+            size="sm"
+            style={styles.fullBtn}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { justifyContent: "center", gap: space.md },
-  eyebrow: {
+  safe: { flex: 1, backgroundColor: theme.paper },
+  scroll: {
+    padding: space.xxl,
+    gap: 28,
+    alignItems: "center",
+  },
+  heroCard: {
+    width: "100%",
+    gap: space.lg,
+    padding: space.xxl,
+  },
+  cardLabel: {
     fontFamily: fonts.label,
-    fontSize: 11,
+    fontSize: 12,
+    color: theme.creamFaint,
     letterSpacing: 1.4,
-    color: theme.faded,
-  },
-  logo: {
-    fontFamily: fonts.display,
-    fontSize: 56,
-    color: theme.ink,
-    letterSpacing: -1.5,
-  },
-  epigraph: {
-    fontFamily: fonts.displayItalic,
-    fontSize: 16,
-    color: theme.inkSoft,
-    fontStyle: "italic",
-    maxWidth: 320,
-    marginTop: space.xs,
-    marginBottom: space.xl,
-    lineHeight: 24,
-  },
-  sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: space.md },
-  formCard: {
-    backgroundColor: theme.paperDeep,
-    padding: card.default,
-    borderRadius: radius.lg,
-    gap: space.md,
-    borderWidth: 1,
-    borderColor: theme.line,
+    textTransform: "uppercase",
   },
   input: {
-    fontFamily: fonts.body,
-    backgroundColor: theme.paper,
-    color: theme.ink,
-    padding: card.tight,
-    borderRadius: radius.md,
+    padding: cave.field,
+    borderRadius: cave.pill,
+    borderWidth: 2,
+    borderColor: theme.night,
     fontSize: 16,
-    borderWidth: 1,
-    borderColor: theme.line,
+    fontFamily: fonts.bodyMedium,
+    color: theme.night,
+    backgroundColor: theme.stamp,
   },
-  error: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
-  switchWrap: { padding: space.sm, alignItems: "center" },
-  switchPressed: { opacity: 0.6 },
-  switch: {
-    fontFamily: fonts.body,
-    color: theme.stamp,
-    textAlign: "center",
-    fontSize: 14,
-    textDecorationLine: "underline",
-  },
+  error: { fontFamily: fonts.bodyBold, color: theme.cream, fontSize: 13 },
+  fullBtn: { width: "100%" },
 });
