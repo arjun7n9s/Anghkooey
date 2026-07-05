@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Animated, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../components/Screen";
+import { Mark } from "../components/Mark";
 import { useAuth } from "../lib/auth";
 import { listBoxesDetailed, type BoxDetail } from "../lib/boxes";
 import { theme } from "../lib/theme";
@@ -86,7 +87,10 @@ export default function Dashboard() {
   return (
     <Screen style={{ paddingHorizontal: 0 }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.wordmark}>Anghkooey</Text>
+        <View style={styles.wordmarkRow}>
+          <Mark size={22} />
+          <Text style={styles.wordmark}>Anghkooey</Text>
+        </View>
         <Text style={styles.heroEyebrow}>YOUR ARCHIVE</Text>
         <Text style={styles.heroTitle}>Dashboard</Text>
         <Text style={styles.sub}>Where your stuff remembers you.</Text>
@@ -134,6 +138,11 @@ const styles = StyleSheet.create({
     maxWidth: 1200,
     alignSelf: "center",
     width: "100%",
+  },
+  wordmarkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   wordmark: {
     fontFamily: fonts.display,

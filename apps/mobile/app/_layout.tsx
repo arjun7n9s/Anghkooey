@@ -1,4 +1,5 @@
 import {
+  Fraunces_400Regular_Italic,
   Fraunces_600SemiBold,
   Fraunces_700Bold,
   useFonts as useFraunces,
@@ -65,7 +66,11 @@ function GuardedStack() {
 }
 
 export default function RootLayout() {
-  const [frauncesLoaded] = useFraunces({ Fraunces_700Bold, Fraunces_600SemiBold });
+  const [frauncesLoaded] = useFraunces({
+    Fraunces_700Bold,
+    Fraunces_600SemiBold,
+    Fraunces_400Regular_Italic,
+  });
   const [dmLoaded] = useDmSans({
     DMSans_400Regular,
     DMSans_500Medium,

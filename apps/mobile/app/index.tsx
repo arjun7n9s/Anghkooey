@@ -2,6 +2,7 @@ import { Link } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Screen } from "../components/Screen";
+import { Mark } from "../components/Mark";
 import { listBoxes } from "../lib/boxes";
 import { useAuth } from "../lib/auth";
 import { fonts } from "../lib/typography";
@@ -41,7 +42,10 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>Anghkooey</Text>
+          <View style={styles.logoRow}>
+            <Mark size={22} />
+            <Text style={styles.logo}>Anghkooey</Text>
+          </View>
           <Pressable onPress={() => signOut()}>
             <Text style={styles.signOut}>Sign out</Text>
           </Pressable>
@@ -110,7 +114,7 @@ export default function HomeScreen() {
 
         <Link href="/dashboard" asChild>
           <Pressable style={styles.dashboardCard}>
-            <Text style={styles.dashboardEyebrow}>FOR JUDGES</Text>
+            <Text style={styles.dashboardEyebrow}>WEB VIEW</Text>
             <Text style={styles.dashboardTitle}>Open dashboard</Text>
             <Text style={styles.dashboardSub}>Full archive view — stats, boxes, and every item at a glance.</Text>
           </Pressable>
@@ -129,6 +133,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { padding: 24, gap: 14 },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
+  logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   logo: { fontFamily: fonts.display, fontSize: 34, color: theme.ink, letterSpacing: -1 },
   signOut: { fontFamily: fonts.body, color: theme.faded, fontSize: 13, marginTop: 8 },
   sub: { fontFamily: fonts.body, color: theme.inkSoft, fontSize: 16, marginBottom: 4 },
@@ -189,7 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     gap: 6,
   },
-  dashboardEyebrow: { fontFamily: fonts.label, fontSize: 11, color: "rgba(255,255,255,0.75)", letterSpacing: 1.2 },
+  dashboardEyebrow: { fontFamily: fonts.label, fontSize: 11, color: theme.inkSoft, letterSpacing: 1.2 },
   dashboardTitle: { fontFamily: fonts.displaySemi, fontSize: 22, color: theme.paper },
   dashboardSub: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: "rgba(255,255,255,0.9)" },
 });

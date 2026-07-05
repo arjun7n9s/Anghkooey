@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { PrimaryButton } from "../components/PrimaryButton";
 import { Screen } from "../components/Screen";
 import { useAuth } from "../lib/auth";
+import { fonts } from "../lib/typography";
 import { theme } from "../lib/theme";
 
 export default function LoginScreen() {
@@ -32,6 +33,9 @@ export default function LoginScreen() {
     <Screen style={styles.container}>
       <Text style={styles.eyebrow}>YOUR BOX MEMORY</Text>
       <Text style={styles.logo}>Anghkooey</Text>
+      <Text style={styles.epigraph}>
+        I moved last year. I packed 47 boxes. I labeled four of them.
+      </Text>
       <Text style={styles.sub}>Open your archive of physical stuff.</Text>
 
       <View style={styles.card}>
@@ -73,9 +77,29 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { justifyContent: "center", gap: 14 },
-  eyebrow: { fontSize: 11, fontWeight: "700", letterSpacing: 1.4, color: theme.faded },
-  logo: { fontSize: 40, fontWeight: "700", color: theme.ink, letterSpacing: -1 },
-  sub: { color: theme.inkSoft, marginBottom: 12 },
+  eyebrow: {
+    fontFamily: fonts.label,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    color: theme.faded,
+  },
+  logo: {
+    fontFamily: fonts.display,
+    fontSize: 40,
+    color: theme.ink,
+    letterSpacing: -1,
+  },
+  epigraph: {
+    fontFamily: fonts.displayItalic,
+    fontSize: 17,
+    color: theme.inkSoft,
+    fontStyle: "italic",
+    maxWidth: 320,
+    marginTop: 16,
+    marginBottom: 24,
+    lineHeight: 26,
+  },
+  sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: 12 },
   card: {
     backgroundColor: theme.paperDeep,
     padding: 20,
@@ -85,6 +109,7 @@ const styles = StyleSheet.create({
     borderColor: theme.line,
   },
   input: {
+    fontFamily: fonts.body,
     backgroundColor: theme.paper,
     color: theme.ink,
     padding: 14,
@@ -93,6 +118,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.line,
   },
-  error: { color: theme.error, fontSize: 13 },
-  switch: { color: theme.stamp, textAlign: "center", marginTop: 8, fontSize: 14 },
+  error: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
+  switch: { fontFamily: fonts.body, color: theme.stamp, textAlign: "center", marginTop: 8, fontSize: 14 },
 });
