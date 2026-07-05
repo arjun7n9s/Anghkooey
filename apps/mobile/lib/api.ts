@@ -58,6 +58,18 @@ export const api = {
     if (!res.ok) throw new Error(await res.text());
     return res.text();
   },
+  shareBox: (qrToken: string, email: string, action: "add" | "remove") =>
+    fn<{ shared_with: string[]; action: string }>("share-box", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ qrToken, email, action }),
+    }),
+  ensureAccount: (email: string, password: string) =>
+    fn<{ ok: boolean; existed?: boolean; userId?: string }>("ensure-account", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }),
   transcribe: async (uri: string) => {
     const token = await getAccessToken();
     if (!token) throw new Error("Not signed in");

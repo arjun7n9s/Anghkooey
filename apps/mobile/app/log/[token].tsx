@@ -14,11 +14,13 @@ import { AnimatedChips } from "../../components/AnimatedChips";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { deleteBoxItem, updateBoxMeta } from "../../lib/boxes";
 import { api, type Box } from "../../lib/api";
+import { useAuth } from "../../lib/auth";
 import { fonts } from "../../lib/typography";
 import { theme } from "../../lib/theme";
 
 export default function LogScreen() {
   const { token } = useLocalSearchParams<{ token: string }>();
+  const { session } = useAuth();
   const [box, setBox] = useState<Box | null>(null);
   const [boxLabel, setBoxLabel] = useState("");
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
@@ -32,6 +34,10 @@ export default function LogScreen() {
   const [saved, setSaved] = useState(false);
   const [saveMode, setSaveMode] = useState<"replace" | "append">("replace");
   const [chipKey, setChipKey] = useState(0);
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareStatus, setShareStatus] = useState("");
+
+  const isOwner = Boolean(box && session?.user?.id === box.accountId);
 
   useEffect(() => {
     if (!token) return;
@@ -144,75 +150,89 @@ export default function LogScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.sectionLabel}>BOX NAME</Text>
-      <TextInput
-        style={styles.labelInput}
-        value={boxLabel}
-        onChangeText={setBoxLabel}
-        onBlur={saveMeta}
-        placeholder="Box #14 or Garage gear"
-        placeholderTextColor={theme.faded}
-      />
+      {isOwner ? (
+        <TextInput
+          style={styles.labelInput}
+          value={boxLabel}
+          onChangeText={setBoxLabel}
+          onBlur={saveMeta}
+          placeholder="Box #14 or Garage gear"
+          placeholderTextColor={theme.faded}
+        />
+      ) : (
+        <Text style={styles.labelReadonly}>{boxLabel || box?.label}</Text>
+      )}
 
       <Text style={styles.boxNumber}>{boxLabel || box?.label}</Text>
-      <Text style={styles.sub}>Tell this box what’s inside while you pack.</Text>
+      {!isOwner ? (
+        <Text style={styles.sharedView}>Shared with you — view only</Text>
+      ) : (
+        <Text style={styles.sub}>Tell this box what’s inside while you pack.</Text>
+      )}
 
-      <View style={styles.modeRow}>
-        <Pressable
-          style={[styles.modeBtn, saveMode === "replace" && styles.modeActive]}
-          onPress={() => setSaveMode("replace")}
-        >
-          <Text style={[styles.modeText, saveMode === "replace" && styles.modeTextActive]}>Replace all</Text>
-        </Pressable>
-        <Pressable
-          style={[styles.modeBtn, saveMode === "append" && styles.modeActive]}
-          onPress={() => setSaveMode("append")}
-        >
-          <Text style={[styles.modeText, saveMode === "append" && styles.modeTextActive]}>Add items</Text>
-        </Pressable>
-      </View>
+      {isOwner ? (
+        <>
+          <View style={styles.modeRow}>
+            <Pressable
+              style={[styles.modeBtn, saveMode === "replace" && styles.modeActive]}
+              onPress={() => setSaveMode("replace")}
+            >
+              <Text style={[styles.modeText, saveMode === "replace" && styles.modeTextActive]}>Replace all</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.modeBtn, saveMode === "append" && styles.modeActive]}
+              onPress={() => setSaveMode("append")}
+            >
+              <Text style={[styles.modeText, saveMode === "append" && styles.modeTextActive]}>Add items</Text>
+            </Pressable>
+          </View>
 
-      <Pressable
-        style={[styles.mic, recording && styles.micActive]}
-        onPressIn={startRecording}
-        onPressOut={stopAndSave}
-        disabled={saving}
-      >
-        {saving && !recording ? (
-          <ActivityIndicator color={theme.paper} />
-        ) : (
-          <>
-            <Text style={styles.micText}>
-              {recording ? "Listening… release to save" : "Hold to log by voice"}
-            </Text>
-            {recording ? <View style={styles.wave} /> : null}
-          </>
-        )}
-      </Pressable>
+          <Pressable
+            style={[styles.mic, recording && styles.micActive]}
+            onPressIn={startRecording}
+            onPressOut={stopAndSave}
+            disabled={saving}
+          >
+            {saving && !recording ? (
+              <ActivityIndicator color={theme.paper} />
+            ) : (
+              <>
+                <Text style={styles.micText}>
+                  {recording ? "Listening… release to save" : "Hold to log by voice"}
+                </Text>
+                {recording ? <View style={styles.wave} /> : null}
+              </>
+            )}
+          </Pressable>
 
-      <Text style={styles.sectionLabel}>OR TYPE IT</Text>
-      <TextInput
-        style={styles.input}
-        multiline
-        placeholder="Canon camera, HDMI cables, charger…"
-        placeholderTextColor={theme.faded}
-        value={manualText}
-        onChangeText={setManualText}
-      />
-      <PrimaryButton
-        label="Save typed list"
-        onPress={() => persistTranscript(manualText)}
-        disabled={saving || !manualText.trim()}
-      />
+          <Text style={styles.sectionLabel}>OR TYPE IT</Text>
+          <TextInput
+            style={styles.input}
+            multiline
+            placeholder="Canon camera, HDMI cables, charger…"
+            placeholderTextColor={theme.faded}
+            value={manualText}
+            onChangeText={setManualText}
+          />
+          <PrimaryButton
+            label="Save typed list"
+            onPress={() => persistTranscript(manualText)}
+            disabled={saving || !manualText.trim()}
+          />
 
-      <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
-      <TextInput
-        style={styles.inputSingle}
-        placeholder="Garage, top shelf, far right…"
-        placeholderTextColor={theme.faded}
-        value={locationHint}
-        onChangeText={setLocationHint}
-        onBlur={saveMeta}
-      />
+          <Text style={styles.sectionLabel}>WHERE IS THIS BOX?</Text>
+          <TextInput
+            style={styles.inputSingle}
+            placeholder="Garage, top shelf, far right…"
+            placeholderTextColor={theme.faded}
+            value={locationHint}
+            onChangeText={setLocationHint}
+            onBlur={saveMeta}
+          />
+        </>
+      ) : box?.locationHint ? (
+        <Text style={styles.locationReadonly}>📍 {box.locationHint}</Text>
+      ) : null}
 
       {error ? <Text style={styles.errorInline}>{error}</Text> : null}
       {saved ? <Text style={styles.saved}>Saved to {boxLabel || box?.label}</Text> : null}
@@ -227,7 +247,41 @@ export default function LogScreen() {
       {items.length > 0 && (
         <View style={styles.chipsWrap}>
           <Text style={styles.sectionLabel}>ITEMS · TAP × TO REMOVE</Text>
-          <AnimatedChips key={chipKey} items={items} onRemove={removeItem} />
+          <AnimatedChips key={chipKey} items={items} onRemove={isOwner ? removeItem : undefined} />
+        </View>
+      )}
+
+      {saved && isOwner && (
+        <View style={styles.shareSection}>
+          <Text style={styles.sectionLabel}>SHARE THIS BOX</Text>
+          <Text style={styles.shareHint}>Anyone you share with can scan this QR and find what you stored.</Text>
+          <TextInput
+            style={styles.inputSingle}
+            placeholder="partner@email.com"
+            placeholderTextColor={theme.faded}
+            value={shareEmail}
+            onChangeText={setShareEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <PrimaryButton
+            label="Share with this email"
+            onPress={async () => {
+              const email = shareEmail.trim();
+              if (!email || !token) return;
+              try {
+                setShareStatus("");
+                await api.ensureAccount(email, "demo-password-123");
+                await api.shareBox(token, email, "add");
+                setShareStatus(`Shared with ${email}. They can scan this QR and see what's inside.`);
+                setShareEmail("");
+              } catch (e) {
+                setShareStatus(e instanceof Error ? e.message : "Share failed");
+              }
+            }}
+            style={{ marginTop: 8 }}
+          />
+          {shareStatus ? <Text style={styles.saved}>{shareStatus}</Text> : null}
         </View>
       )}
 
@@ -259,6 +313,9 @@ const styles = StyleSheet.create({
   },
   boxNumber: { fontFamily: fonts.display, fontSize: 48, color: theme.ink, letterSpacing: -1 },
   sub: { fontFamily: fonts.body, color: theme.inkSoft, marginBottom: 4 },
+  sharedView: { fontFamily: fonts.bodyBold, color: theme.wax, marginBottom: 4 },
+  labelReadonly: { fontFamily: fonts.bodyMedium, fontSize: 15, color: theme.inkSoft },
+  locationReadonly: { fontFamily: fonts.body, fontSize: 15, color: theme.inkSoft, fontStyle: "italic" },
   modeRow: { flexDirection: "row", gap: 8 },
   modeBtn: {
     flex: 1,
@@ -322,6 +379,14 @@ const styles = StyleSheet.create({
   quoteLabel: { fontFamily: fonts.label, color: theme.faded, marginBottom: 8 },
   quoteText: { fontFamily: fonts.body, color: theme.ink, lineHeight: 22, fontStyle: "italic" },
   chipsWrap: { gap: 8 },
+  shareSection: {
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: theme.line,
+    gap: 8,
+  },
+  shareHint: { fontFamily: fonts.body, fontSize: 14, color: theme.inkSoft, lineHeight: 20 },
   error: { fontFamily: fonts.body, color: theme.error, textAlign: "center" },
   errorInline: { fontFamily: fonts.body, color: theme.error, fontSize: 13 },
   saved: { fontFamily: fonts.bodyBold, color: theme.wax },

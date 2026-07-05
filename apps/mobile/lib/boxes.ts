@@ -10,7 +10,20 @@ export type BoxSummary = {
   locationHint?: string;
   itemCount: number;
   preview?: string;
+  accountId?: string;
+  isShared?: boolean;
 };
+
+export type BoxDetail = BoxSummary & {
+  items: { name: string; category?: string }[];
+};
+
+function itemCountFromRelation(items: unknown): number {
+  if (!items || !Array.isArray(items) || items.length === 0) return 0;
+  const first = items[0] as { count?: number; name?: string };
+  if (typeof first.count === "number") return first.count;
+  return items.length;
+}
 
 function mapRow(row: {
   id: string;
@@ -19,27 +32,56 @@ function mapRow(row: {
   last_touched: string;
   location_hint?: string | null;
   raw_transcript?: string | null;
-  box_items?: { count: number }[];
-}): BoxSummary {
+  account_id?: string;
+  box_items?: { count: number }[] | { id: string; name: string; category?: string | null }[];
+}, userId?: string): BoxSummary {
+  const itemCount = itemCountFromRelation(row.box_items);
+
   return {
     id: row.id,
     label: row.label,
     qrToken: row.qr_token,
     lastTouched: row.last_touched,
     locationHint: row.location_hint ?? undefined,
-    itemCount: row.box_items?.[0]?.count ?? 0,
+    itemCount,
     preview: row.raw_transcript?.slice(0, 80),
+    accountId: row.account_id,
+    isShared: userId ? row.account_id !== userId : undefined,
   };
 }
 
 export async function listBoxes(): Promise<BoxSummary[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+
   const { data, error } = await supabase
     .from("boxes")
-    .select("id, label, qr_token, last_touched, location_hint, raw_transcript, box_items(count)")
+    .select("id, label, qr_token, last_touched, location_hint, raw_transcript, account_id, box_items(count)")
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return (data ?? []).map(mapRow).sort((a, b) => boxSortKey(a.label) - boxSortKey(b.label));
+  return (data ?? []).map((row) => mapRow(row, userId)).sort((a, b) => boxSortKey(a.label) - boxSortKey(b.label));
+}
+
+export async function listBoxesDetailed(): Promise<BoxDetail[]> {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+
+  const { data, error } = await supabase
+    .from("boxes")
+    .select("id, label, qr_token, last_touched, location_hint, raw_transcript, account_id, box_items(name, category)")
+    .order("last_touched", { ascending: false });
+
+  if (error) throw error;
+
+  return (data ?? []).map((row) => {
+    const summary = mapRow(row, userId);
+    const rawItems = (row.box_items ?? []) as { name: string; category?: string | null }[];
+    return {
+      ...summary,
+      items: rawItems.map((i) => ({ name: i.name, category: i.category ?? undefined })),
+    };
+  });
 }
 
 export async function updateBoxMeta(
