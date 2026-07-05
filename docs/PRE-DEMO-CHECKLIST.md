@@ -30,7 +30,7 @@ Run through this **30 minutes before** you present.
 
 ## Rehearsal
 
-- [ ] Ran full script once (see [DEMO-SCRIPT.md](./DEMO-SCRIPT.md))
+- [ ] Ran full demo flow once end to end
 - [ ] Timed under 95 seconds
 - [ ] Share flow tested: A shares → B scans A's QR → B sees items
 - [ ] Find returns results for "camera" or "cables"

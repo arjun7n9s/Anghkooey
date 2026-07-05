@@ -38,11 +38,11 @@ Handwritten labels fade. Spreadsheets lie. Memory fails — especially after six
   <tr>
     <td width="50%" align="center">
       <img src="docs/screenshots/home.png" alt="Home screen" width="420" />
-      <br /><strong>Home</strong> — archive at a glance
+      <br /><strong>Home</strong> — your archive at a glance
     </td>
     <td width="50%" align="center">
-      <img src="docs/screenshots/login.png" alt="Login screen" width="420" />
-      <br /><strong>Login</strong> — open your archive
+      <img src="docs/screenshots/sidebar.png" alt="Sidebar navigation" width="420" />
+      <br /><strong>Menu</strong> — profile, stats, and quick links
     </td>
   </tr>
   <tr>
@@ -51,14 +51,18 @@ Handwritten labels fade. Spreadsheets lie. Memory fails — especially after six
       <br /><strong>Scan</strong> — align your QR label
     </td>
     <td width="50%" align="center">
-      <img src="docs/screenshots/find.png" alt="Find screen" width="420" />
-      <br /><strong>Find</strong> — semantic search
+      <img src="docs/screenshots/log.png" alt="Log screen" width="420" />
+      <br /><strong>Log</strong> — speak or type what's inside
     </td>
   </tr>
   <tr>
-    <td colspan="2" align="center">
-      <img src="docs/screenshots/print.png" alt="Print labels screen" width="420" />
-      <br /><strong>Print</strong> — 24 QR labels per account
+    <td width="50%" align="center">
+      <img src="docs/screenshots/find.png" alt="Find screen" width="420" />
+      <br /><strong>Find</strong> — search across all your boxes
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/screenshots/labels.png" alt="Print labels screen" width="420" />
+      <br /><strong>Labels</strong> — print or save QR sheets
     </td>
   </tr>
 </table>
@@ -67,7 +71,7 @@ Handwritten labels fade. Spreadsheets lie. Memory fails — especially after six
 
 ## 90-second demo flow
 
-See **[docs/DEMO-SCRIPT.md](docs/DEMO-SCRIPT.md)** and **[docs/PRE-DEMO-CHECKLIST.md](docs/PRE-DEMO-CHECKLIST.md)** for the full judge-facing script.
+See **[docs/PRE-DEMO-CHECKLIST.md](docs/PRE-DEMO-CHECKLIST.md)** for the pre-demo checklist.
 
 | Beat | Screen | What to show |
 |------|--------|--------------|
