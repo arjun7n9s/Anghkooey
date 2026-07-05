@@ -1,6 +1,7 @@
 hangover/
 .env
 .env.local
+apps/mobile/.env
 node_modules/
 dist/
 .expo/
@@ -8,4 +9,5 @@ dist/
 *.log
 .DS_Store
 services/api/data/
+supabase/.temp/
 *.tsbuildinfo
