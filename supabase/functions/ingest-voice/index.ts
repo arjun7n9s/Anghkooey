@@ -8,7 +8,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
 
   try {
-    const { supabase } = await requireUser(req);
+    const { supabase, user } = await requireUser(req);
     const body = await req.json();
     const { qrToken, transcript, mode = "replace" } = body as {
       qrToken?: string;
@@ -22,6 +22,9 @@ Deno.serve(async (req) => {
 
     const box = await loadBox(supabase, qrToken);
     if (!box) return json({ error: "Unknown QR" }, 404);
+    if (box.accountId !== user.id) {
+      return json({ error: "Only the box owner can edit contents" }, 403);
+    }
 
     const parsed = parseItemsFromTranscript(transcript);
     const now = new Date().toISOString();
