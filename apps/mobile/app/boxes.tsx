@@ -79,7 +79,10 @@ export default function BoxesScreen() {
             <Pressable style={styles.row} onPress={() => router.push(`/log/${item.qrToken}`)}>
               <View style={[styles.statusDot, item.itemCount > 0 && styles.statusLogged]} />
               <View style={styles.rowMain}>
-                <Text style={styles.label}>{item.label}</Text>
+                <View style={styles.labelRow}>
+                  <Text style={styles.label}>{item.label}</Text>
+                  {item.isShared ? <Text style={styles.sharedBadge}>Shared</Text> : null}
+                </View>
                 <Text style={styles.meta}>
                   {item.itemCount} item{item.itemCount === 1 ? "" : "s"}
                   {item.locationHint ? ` · ${item.locationHint}` : ""}
@@ -125,7 +128,15 @@ const styles = StyleSheet.create({
   },
   statusLogged: { backgroundColor: theme.wax },
   rowMain: { flex: 1, gap: 4 },
+  labelRow: { flexDirection: "row", alignItems: "center", gap: 8, flexWrap: "wrap" },
   label: { fontFamily: fonts.bodyBold, fontSize: 17, color: theme.ink },
+  sharedBadge: {
+    fontFamily: fonts.label,
+    fontSize: 10,
+    color: theme.wax,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
   meta: { fontFamily: fonts.body, fontSize: 12, color: theme.faded },
   preview: { fontFamily: fonts.body, fontSize: 13, color: theme.inkSoft, fontStyle: "italic", marginTop: 4 },
   emptyRow: { fontFamily: fonts.body, fontSize: 13, color: theme.faded, fontStyle: "italic" },

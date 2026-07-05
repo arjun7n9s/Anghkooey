@@ -251,7 +251,7 @@ export default function LogScreen() {
         </View>
       )}
 
-      {saved && isOwner && (
+      {isOwner && items.length > 0 && (
         <View style={styles.shareSection}>
           <Text style={styles.sectionLabel}>SHARE THIS BOX</Text>
           <Text style={styles.shareHint}>Anyone you share with can scan this QR and find what you stored.</Text>
